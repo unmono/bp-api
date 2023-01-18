@@ -1,2 +1,4 @@
 openpyxl
 pydantic
+defusedxml
+pytest
