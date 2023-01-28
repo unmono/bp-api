@@ -31,7 +31,7 @@ class TestPriceList(ValidatorsCaseMixin):
         uktzed=1234567890,
         min_order=1,
         quantity=1,
-        price=Decimal('100.99'),
+        price='100.99',
         truck='x',
     )
     validators_test_data_set = {
@@ -115,6 +115,19 @@ class TestPriceList(ValidatorsCaseMixin):
                 'section + - a/as',
             ]
         },
+        'price': {
+            'good': [
+                '1.1',
+                '0.123',
+                '0,123',
+                '123',
+            ],
+            'bad': [
+                '1.1.',
+                '.1',
+                '2e',
+            ]
+        },
         'truck': {
             'good': [
                 ('x', True),
@@ -129,11 +142,6 @@ class TestPriceList(ValidatorsCaseMixin):
 
     def test_validators(self):
         super().test_validators(self.validators_test_data_set, self.entry)
-
-    @pytest.mark.parametrize('value', [Decimal('101.991'), '101.994', 101.991])
-    def test_price(self, value):
-        self.entry.price = value
-        assert self.entry.price == Decimal('101.99')
 
 
 class TestMasterData(ValidatorsCaseMixin):

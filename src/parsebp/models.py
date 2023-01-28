@@ -46,12 +46,11 @@ class PriceList(BaseModel):
     uktzed: int = Field(excel_column='I')
     min_order: int = Field(excel_column='J')
     quantity: int = Field(excel_column='K')
-    price: Decimal = Field(excel_column='M')
+    price: constr(
+        strip_whitespace=True,
+        regex=settings.DECIMAL_PATTERN,
+    ) = Field(excel_column='M')
     truck: bool | str = Field(excel_column='P')
-
-    @validator('price')
-    def quantize_price(cls, v: Decimal) -> Decimal:
-        return v.quantize(Decimal('.01'))
 
     @validator('truck')
     def parse_truck(cls, v: Any) -> bool:
@@ -77,14 +76,23 @@ class MasterData(BaseModel):
         regex=settings.PARTNO_PATTERN,
     ) = Field(excel_column='A')
     ean: int = Field(excel_column='B')
-    gross: Decimal = Field(excel_column='C')
-    net: Decimal = Field(excel_column='D')
+    gross: constr(
+        strip_whitespace=True,
+        regex=settings.DECIMAL_PATTERN,
+    ) = Field(excel_column='C')
+    net: constr(
+        strip_whitespace=True,
+        regex=settings.DECIMAL_PATTERN,
+    ) = Field(excel_column='D')
     weight_unit: constr(strip_whitespace=True, regex='^KG$|^kg$|^Kg$') = Field(excel_column='E')
     length: int = Field(excel_column='H')
     width: int = Field(excel_column='I')
     height: int = Field(excel_column='J')
     measure_unit: constr(strip_whitespace=True, regex='^MM$|^mm$|^Mm$') = Field(excel_column='K')
-    volume: Decimal = Field(excel_column='F')
+    volume: constr(
+        strip_whitespace=True,
+        regex=settings.DECIMAL_PATTERN,
+    ) = Field(excel_column='F')
     volume_unit: constr(strip_whitespace=True, regex='^L$|^l$') = Field(excel_column='G')
 
     class Config:

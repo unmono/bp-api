@@ -16,7 +16,7 @@ class UnsupportedFileStructureError(Exception):
     pass
 
 
-class BPModel(Protocol):
+class BPModelTYpe(Protocol):
     sheet_pattern: ClassVar[re.Pattern]
 
 
@@ -37,7 +37,7 @@ class BoschPrice:
             References,
         ]
 
-    def map_model_to_sheet(self, model: BPModel) -> Tuple[str, BPModel] | None:
+    def map_model_to_sheet(self, model: BPModelTYpe) -> Tuple[str, BPModelTYpe] | None:
         """
         Searches in sheet names of the loaded file for patterns of models
         :param model: bp model
@@ -58,3 +58,15 @@ class BoschPrice:
         ]
 
         return [required_sheet, ] + extra_sheets
+
+    def populate_db(self):
+        for sheet, model in self.mapped_sheets():
+            ws = self.wb[sheet]
+            set_of_values = []
+            for i in range(2, ws.max_row + 1):
+                data = {
+                    field: ws[column['excel_column'] + str(i)]
+                    for field, column in model.schema()['properties'].items()
+                }
+                obj = model(**data)
+                set_of_values.append(obj.dict())
