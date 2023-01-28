@@ -5,7 +5,22 @@ from pydantic import ValidationError
 from parsebp import models
 
 
-class TestPriceList:
+class ValidatorsCaseMixin:
+
+    def test_validators(self, data_set, entry):
+        for field, data_set in data_set.items():
+            for v in data_set['good']:
+                v, e = v if type(v) is tuple else (v, v.strip())
+                setattr(entry, field, v)
+                assert getattr(entry, field) == e
+
+            for v in data_set.get('bad', []):
+                v, _ = v if type(v) is tuple else (v, None)
+                with pytest.raises(ValidationError):
+                    setattr(entry, field, v)
+
+
+class TestPriceList(ValidatorsCaseMixin):
     entry = models.PriceList(
         part_no='1234567890',
         title_ua='Title UA',
@@ -17,7 +32,7 @@ class TestPriceList:
         min_order=1,
         quantity=1,
         price=Decimal('100.99'),
-        truck=True,
+        truck='x',
     )
     validators_test_data_set = {
         'part_no': {
@@ -100,19 +115,81 @@ class TestPriceList:
                 'section + - a/as',
             ]
         },
+        'truck': {
+            'good': [
+                ('x', True),
+                ('X', True),
+                ('X ', True),
+                ('Вантажний асортимент', True),
+                ('', False),
+                (' ', False),
+            ]
+        }
     }
 
     def test_validators(self):
-        for field, data_set in self.validators_test_data_set.items():
-            for v in data_set['good']:
-                setattr(self.entry, field, v)
-                assert getattr(self.entry, field) == v.strip()
+        super().test_validators(self.validators_test_data_set, self.entry)
 
-            for v in data_set['bad']:
-                with pytest.raises(ValidationError):
-                    setattr(self.entry, field, v)
-
-    @pytest.mark.parametrize('value', [Decimal('101.991'), '101.99', 101.99])
+    @pytest.mark.parametrize('value', [Decimal('101.991'), '101.994', 101.991])
     def test_price(self, value):
         self.entry.price = value
         assert self.entry.price == Decimal('101.99')
+
+
+class TestMasterData(ValidatorsCaseMixin):
+    entry = models.MasterData(
+        part_no='1234567890',
+        ean='3165142935904',
+        gross='3.318',
+        net='3.084',
+        weight_unit='KG',
+        length='288',
+        width='167',
+        height='120',
+        measure_unit='MM',
+        volume='5.772',
+        volume_unit='L',
+    )
+    validators_data_set = {
+        'weight_unit': {
+            'good': [
+                'KG',
+                'KG ',
+                'Kg',
+                'kg',
+            ],
+            'bad': [
+                'KGxasdf',
+                ' ',
+                '',
+            ],
+        },
+        'measure_unit': {
+            'good': [
+                'MM',
+                'MM ',
+                'mm',
+                'Mm',
+            ],
+            'bad': [
+                'Mmx',
+                ' ',
+                '',
+            ],
+        },
+        'volume_unit': {
+            'good': [
+                'L',
+                'L ',
+                'l',
+            ],
+            'bad': [
+                'Lx',
+                ' ',
+                '',
+            ],
+        },
+    }
+
+    def test_validators(self):
+        super().test_validators(self.validators_data_set, self.entry)
