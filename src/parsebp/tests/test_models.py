@@ -26,8 +26,8 @@ class TestPriceList(ValidatorsCaseMixin):
         title_ua='Title UA',
         title_en='Title EN',
         section='1. Section',
-        subsection='1.1. Sub Section',
-        group='1.1.1. Group',
+        subsection='1.1 Sub Section',
+        subsub='1.1.1 Group',
         uktzed=1234567890,
         min_order=1,
         quantity=1,
@@ -91,25 +91,25 @@ class TestPriceList(ValidatorsCaseMixin):
         },
         'subsection': {
             'good': [
-                '1.1. Section',
-                '2.2. Section  ',
-                '3.3. section + - a/as',
+                '1.1 Section',
+                '2.2 Section  ',
+                '3.3 section + - a/as',
             ],
             'bad': [
-                '1.1.1. Section',
-                '2.2 Section  ',
+                '1.1.1 Section',
+                '2.2. Section  ',
                 '2 Section  ',
                 'section + - a/as',
             ]
         },
-        'group': {
+        'subsub': {
             'good': [
-                '1.1.1. Section',
-                '2.2.2. Section  ',
-                '3.2.2. section + - a/as',
+                '1.1.1 Section',
+                '2.2.2 Section  ',
+                '3.2.2 section + - a/as',
             ],
             'bad': [
-                '1.1.1 Section',
+                '1.1.1. Section',
                 '1.1. Section',
                 '2. Section  ',
                 'section + - a/as',

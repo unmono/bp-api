@@ -1,10 +1,9 @@
 import pytest
 import os
 import sys
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.utils.exceptions import InvalidFileException
 
-from parsebp.__main__ import load_bp
 from parsebp.bosch_price import BoschPrice, UnsupportedFileStructureError
 from parsebp import models
 
@@ -20,11 +19,11 @@ class TestBoschPrice:
 
     def test_unsupported_load(self):
         with pytest.raises(InvalidFileException):
-            BoschPrice(load_bp(self.unsupported_file))
+            BoschPrice(load_workbook(self.unsupported_file, read_only=True))
 
     @classmethod
     def normal_load(cls, file=regular_file):
-        bp = BoschPrice(load_bp(file))
+        bp = BoschPrice(load_workbook(file, read_only=True))
         assert isinstance(bp.wb, Workbook), f'Result must be openpyxl.Workbook instance. ' \
                                             f'{type(bp)} given.'
         return bp

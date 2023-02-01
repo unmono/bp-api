@@ -1,6 +1,4 @@
 import re
-import sqlite3
-import os
 
 from pydantic import (
     BaseModel,
@@ -8,15 +6,42 @@ from pydantic import (
     constr,
     Field,
 )
-from typing import ClassVar, Any
-from decimal import Decimal
+from typing import ClassVar, Any, Optional
 
 
 from settings import ParseSettings
 settings = ParseSettings()
 
 
-class PriceList(BaseModel):
+class BPModel(BaseModel):
+    table_name: ClassVar[str] = None
+
+    @classmethod
+    def sql_title(cls):
+        return cls.table_name or cls.schema()['title'].lower()
+
+    @classmethod
+    def sqlite_schema(cls):
+        title = cls.sql_title()
+        sql_types = {
+            'string': 'TEXT',
+            'integer': 'INTEGER',
+            'bool': 'INTEGER',
+        }
+        list_of_columns = []
+        for field_title, properties in cls.schema()['properties'].items():
+            if not (field_type := properties.get('type')):
+                field_type = properties.get('anyOf')[0]['type']
+            sql_type = sql_types[field_type]
+            list_of_columns.append(f'{field_title} {sql_type}')
+        columns_str = ', '.join(list_of_columns)
+        return f'CREATE TABLE IF NOT EXISTS {title}({columns_str});'
+
+    class Config:
+        validate_assignment = True
+
+
+class PriceList(BPModel):
     sheet_pattern: ClassVar[re.Pattern] = re.compile(r'pricelist', re.I)
 
     part_no: constr(
@@ -27,10 +52,10 @@ class PriceList(BaseModel):
         strip_whitespace=True,
         regex=settings.TITLE_UA_PATTERN,
     ) = Field(excel_column='B')
-    title_en: constr(
+    title_en: Optional[constr(
         strip_whitespace=True,
         regex=settings.TITLE_EN_PATTERN,
-    ) = Field(excel_column='C')
+    )] = Field(excel_column='C')
     section: constr(
         strip_whitespace=True,
         regex=settings.SECTION_PATTERN,
@@ -39,18 +64,18 @@ class PriceList(BaseModel):
         strip_whitespace=True,
         regex=settings.SUBSECTION_PATTERN,
     ) = Field(excel_column='G')
-    group: constr(
+    subsub: constr(
         strip_whitespace=True,
         regex=settings.GROUP_PATTERN,
     ) = Field(excel_column='H')
-    uktzed: int = Field(excel_column='I')
+    uktzed: Optional[int] = Field(excel_column='I')
     min_order: int = Field(excel_column='J')
     quantity: int = Field(excel_column='K')
     price: constr(
         strip_whitespace=True,
         regex=settings.DECIMAL_PATTERN,
     ) = Field(excel_column='M')
-    truck: bool | str = Field(excel_column='P')
+    truck: int | str | None = Field(excel_column='P')
 
     @validator('truck')
     def parse_truck(cls, v: Any) -> bool:
@@ -63,43 +88,36 @@ class PriceList(BaseModel):
         else:
             raise ValueError('The value of the Truck assortment must be str or bool')
 
-    class Config:
-        underscore_attrs_are_private = False
-        validate_assignment = True
 
-
-class MasterData(BaseModel):
+class MasterData(BPModel):
     sheet_pattern: ClassVar[re.Pattern] = re.compile(r'master data', re.I)
 
     part_no: constr(
         strip_whitespace=True,
         regex=settings.PARTNO_PATTERN,
     ) = Field(excel_column='A')
-    ean: int = Field(excel_column='B')
-    gross: constr(
+    ean: Optional[int] = Field(excel_column='B')
+    gross: Optional[constr(
         strip_whitespace=True,
         regex=settings.DECIMAL_PATTERN,
-    ) = Field(excel_column='C')
-    net: constr(
+    )] = Field(excel_column='C')
+    net: Optional[constr(
         strip_whitespace=True,
         regex=settings.DECIMAL_PATTERN,
-    ) = Field(excel_column='D')
-    weight_unit: constr(strip_whitespace=True, regex='^KG$|^kg$|^Kg$') = Field(excel_column='E')
-    length: int = Field(excel_column='H')
-    width: int = Field(excel_column='I')
-    height: int = Field(excel_column='J')
-    measure_unit: constr(strip_whitespace=True, regex='^MM$|^mm$|^Mm$') = Field(excel_column='K')
-    volume: constr(
+    )] = Field(excel_column='D')
+    weight_unit: Optional[constr(strip_whitespace=True, regex='^KG$|^kg$|^Kg$')] = Field(excel_column='E')
+    length: Optional[int] = Field(excel_column='F')
+    width: Optional[int] = Field(excel_column='G')
+    height: Optional[int] = Field(excel_column='H')
+    measure_unit: Optional[constr(strip_whitespace=True, regex='^MM$|^mm$|^Mm$')] = Field(excel_column='I')
+    volume: Optional[constr(
         strip_whitespace=True,
         regex=settings.DECIMAL_PATTERN,
-    ) = Field(excel_column='F')
-    volume_unit: constr(strip_whitespace=True, regex='^L$|^l$') = Field(excel_column='G')
-
-    class Config:
-        validate_assignment = True
+    )] = Field(excel_column='J')
+    volume_unit: Optional[constr(strip_whitespace=True, regex='^L$|^l$')] = Field(excel_column='K')
 
 
-class NewRelease(BaseModel):
+class NewRelease(BPModel):
     sheet_pattern: ClassVar[re.Pattern] = re.compile(r'new release|новий', re.I)
 
     part_no: constr(
@@ -107,12 +125,8 @@ class NewRelease(BaseModel):
         regex=settings.PARTNO_PATTERN,
     ) = Field(excel_column='A')
 
-    class Config:
-        underscore_attrs_are_private = False
-        validate_assignment = True
 
-
-class Discontinued(BaseModel):
+class Discontinued(BPModel):
     sheet_pattern: ClassVar[re.Pattern] = re.compile(r'зняті', re.I)
 
     part_no: constr(
@@ -120,12 +134,9 @@ class Discontinued(BaseModel):
         regex=settings.PARTNO_PATTERN,
     ) = Field(excel_column='A')
 
-    class Config:
-        underscore_attrs_are_private = False
-        validate_assignment = True
 
-
-class References(BaseModel):
+class References(BPModel):
+    table_name = 'refs'
     sheet_pattern: ClassVar[re.Pattern] = re.compile(r'Замін', re.I)
 
     predecessor: constr(
@@ -136,7 +147,3 @@ class References(BaseModel):
         strip_whitespace=True,
         regex=settings.PARTNO_PATTERN
     ) = Field(excel_column='B')
-
-    class Config:
-        underscore_attrs_are_private = False
-        validate_assignment = True
