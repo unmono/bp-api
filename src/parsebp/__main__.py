@@ -1,11 +1,17 @@
-from openpyxl import Workbook, load_workbook
+import sys
+import time
+from openpyxl import load_workbook
 
-
-def load_bp(bp_file: str) -> Workbook:
-    wb = load_workbook(bp_file, read_only=True)
-
-    return wb
+from .bosch_price import BoschPrice
 
 
 if __name__ == '__main__':
-    pass
+    start = time.perf_counter()
+    if len(sys.argv) != 2:
+        raise SystemExit('Too many arguments.')
+    wb = load_workbook(sys.argv[1])
+
+    bp = BoschPrice(wb)
+    bp.populate_db()
+
+    print(time.perf_counter() - start)
