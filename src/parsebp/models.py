@@ -56,11 +56,11 @@ class PriceList(BPModel):
         strip_whitespace=True,
         regex=settings.TITLE_EN_PATTERN,
     )] = Field(excel_column='C')
-    section: constr(
+    sect: constr(
         strip_whitespace=True,
         regex=settings.SECTION_PATTERN,
     ) = Field(excel_column='F')
-    subsection: constr(
+    subsect: constr(
         strip_whitespace=True,
         regex=settings.SUBSECTION_PATTERN,
     ) = Field(excel_column='G')
