@@ -50,7 +50,7 @@ ADD COLUMN partnum_id INT REFERENCES partnum(rowid);
 -- ----------------------------
 BEGIN TRANSACTION;
     -- Section table
-    -- String, that holds section number and title. Like:
+    -- String, that holds section number and title is like:
     -- 1. Section title
     -- The number of section becomes an id
     WITH sect_dividers AS(
@@ -58,8 +58,8 @@ BEGIN TRANSACTION;
         FROM (SELECT DISTINCT sect FROM pricelist)
     ) INSERT INTO sect
         SELECT
-            -- sqlite counts chars from 1 and instr returns the number of a char
-            -- in a string. Counting from 0 here has effect of normal behavior.
+            -- sqlite counts chars from 1 and instr returns the number of given char
+            -- in a string. Counting from 0 here has effect of python-like behavior.
             substr(sect, 0, dotindex) AS id,
             substr(sect, dotindex + 2) AS title
         FROM sect_dividers;
@@ -149,6 +149,8 @@ BEGIN TRANSACTION;
     FROM subsub AS s
     WHERE pricelist.subsub = s.raw_subsub;
 
+    CREATE UNIQUE INDEX idx_partnum ON partnum(part_no);
+
     -- Relating pricelist entries to part numbers table
     UPDATE pricelist
     SET partnum_id = (
@@ -160,8 +162,6 @@ BEGIN TRANSACTION;
     SET partnum_id = (
         SELECT rowid from partnum where part_no = masterdata.part_no
     );
-
-    CREATE INDEX idx_partnum ON partnum(part_no);
 COMMIT TRANSACTION;
 
 

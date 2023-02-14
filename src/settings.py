@@ -1,4 +1,3 @@
-import re
 from pydantic import BaseSettings
 
 
@@ -6,6 +5,12 @@ class ParseSettings(BaseSettings):
 
     # Path to raw bp db
     RAW_DB: str = './raw.sqlite'
+
+    # Path to normalized bp db
+    NORMALIZED_DB: str = './bp.sqlite'
+
+    # Normalization script
+    NORMALIZATION_SCRIPT: str = './bp_normalization.sql'
 
     # Excel columns re.patterns
     PARTNO_PATTERN: str = r'^[0-9A-Z]{10}$'

@@ -1,17 +1,22 @@
 import sys
-import time
 from openpyxl import load_workbook
 
 from .bosch_price import BoschPrice
+from unmonostuff.perfomance_tools import execution_timer
 
 
-if __name__ == '__main__':
-    start = time.perf_counter()
-    if len(sys.argv) != 2:
-        raise SystemExit('Too many arguments.')
-    wb = load_workbook(sys.argv[1])
+def validate_argv(args: list) -> bool:
+    if len(args) != 2:
+        raise SystemExit(f'Unknown arguments: {args[2:]}')
+    return True
 
+
+@execution_timer
+def process_bp(file_name: str) -> None:
+    wb = load_workbook(file_name)
     bp = BoschPrice(wb)
     bp.populate_db()
 
-    print(time.perf_counter() - start)
+
+if __name__ == '__main__':
+    process_bp(sys.argv[1])
