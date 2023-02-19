@@ -5,9 +5,6 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     Integer,
-    String,
-    Boolean,
-    DECIMAL,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -25,6 +22,17 @@ class Base(DeclarativeBase, MappedAsDataclass):
 id_pk = Annotated[int, mapped_column('id', Integer, init=False, primary_key=True)]
 rowid_pk = Annotated[int, mapped_column('rowid', Integer, init=False, primary_key=True)]
 partnum_fk = Annotated[int, mapped_column(ForeignKey('partnum.id'))]
+
+
+class PartnumReference(Base):
+    """
+    Partnum self joining table.
+    """
+    __tablename__ = 'refers'
+
+    id: Mapped[rowid_pk]
+    predecessor: Mapped[int] = mapped_column(ForeignKey('partnum.id'))
+    successor: Mapped[int] = mapped_column(ForeignKey('partnum.id'))
 
 
 class Section(Base):
@@ -53,7 +61,7 @@ class SubSection(Base):
 
 class Subsub(Base):
     """
-    Subsubsection of Bosch catalogue heirarchy. Referes to Subsection.
+    Subsubsection of Bosch catalogue heirarchy. Refers to Subsection.
     """
     __tablename__ = 'subsub'
 
@@ -78,6 +86,7 @@ class PartNumber(Base):
     new_release: Mapped[bool]
     products: Mapped['Product'] = relationship(back_populates='partnumber')  # Same name as field? Without name?
     masterdata: Mapped['MasterData'] = relationship(back_populates='partnumber')
+    refers: Mapped[List['PartnumReference']] = relationship()
 
 
 class Product(Base):
@@ -92,7 +101,7 @@ class Product(Base):
     uktzed: Mapped[int]
     min_order: Mapped[int]
     quantity: Mapped[int]
-    price: Mapped[DECIMAL]
+    price: Mapped[Decimal]
     truck: Mapped[bool]
     id: Mapped[rowid_pk]
     partnum_id: Mapped[partnum_fk]
@@ -108,14 +117,14 @@ class MasterData(Base):
     __tablename__ = 'masterdata'
 
     ean: Mapped[int]
-    gross: Mapped[DECIMAL]
-    net: Mapped[DECIMAL]
+    gross: Mapped[Decimal]
+    net: Mapped[Decimal]
     weight_unit: Mapped[str]
     length: Mapped[int]
     width: Mapped[int]
     height: Mapped[int]
     measure_unit: Mapped[str]
-    volume: Mapped[DECIMAL]
+    volume: Mapped[Decimal]
     volume_unit: Mapped[str]
     id: Mapped[rowid_pk]
     partnum_id: Mapped[partnum_fk]
