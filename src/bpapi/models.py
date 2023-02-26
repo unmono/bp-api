@@ -2,37 +2,35 @@ from decimal import Decimal
 from typing import List
 from typing_extensions import Annotated
 from sqlalchemy import (
-    Column,
     ForeignKey,
     Integer,
+    Table,
+    Column,
+    DECIMAL,
 )
 from sqlalchemy.orm import (
     relationship,
     DeclarativeBase,
     Mapped,
     mapped_column,
-    MappedAsDataclass,
+    # MappedAsDataclass,  # causes infinite recursion
 )
 
 
-class Base(DeclarativeBase, MappedAsDataclass):
+class Base(DeclarativeBase):
     pass
 
 
-id_pk = Annotated[int, mapped_column('id', Integer, init=False, primary_key=True)]
-rowid_pk = Annotated[int, mapped_column('rowid', Integer, init=False, primary_key=True)]
-partnum_fk = Annotated[int, mapped_column(ForeignKey('partnum.id'))]
+id_pk = Annotated[int, mapped_column('id', Integer, primary_key=True)]
+rowid_pk = Annotated[int, mapped_column('rowid', Integer, primary_key=True)]
+partnum_fk = Annotated[int, mapped_column(ForeignKey('partnum.rowid'))]
 
-
-class PartnumReference(Base):
-    """
-    Partnum self joining table.
-    """
-    __tablename__ = 'refers'
-
-    id: Mapped[rowid_pk]
-    predecessor: Mapped[int] = mapped_column(ForeignKey('partnum.id'))
-    successor: Mapped[int] = mapped_column(ForeignKey('partnum.id'))
+partnumber_junction = Table(
+    'refers',
+    Base.metadata,
+    Column('predecessor', Integer, ForeignKey('partnum.rowid'), primary_key=True),
+    Column('successor', Integer, ForeignKey('partnum.rowid'), primary_key=True),
+)
 
 
 class Section(Base):
@@ -43,7 +41,7 @@ class Section(Base):
 
     id: Mapped[id_pk]
     title: Mapped[str]
-    subsections: Mapped[List['SubSection']] = relationship(back_populates='section')
+    # subsections: Mapped[list['SubSection']] = relationship(back_populates='section')
 
 
 class SubSection(Base):
@@ -55,8 +53,8 @@ class SubSection(Base):
     id: Mapped[id_pk]
     title: Mapped[str]
     sect_id: Mapped[int] = mapped_column(ForeignKey('sect.id'))
-    section: Mapped['Section'] = relationship(back_populates='subsections')
-    subsubsections: Mapped['Subsub'] = relationship(back_populates='subsection')
+    # section: Mapped['Section'] = relationship(lazy='joined')
+    # subsubsections: Mapped[list['Subsub']] = relationship(back_populates='subsection')
 
 
 class Subsub(Base):
@@ -65,10 +63,11 @@ class Subsub(Base):
     """
     __tablename__ = 'subsub'
 
-    id: Mapped[id_pk]
+    id: Mapped[rowid_pk]
     title: Mapped[str]
     subsect_id: Mapped[int] = mapped_column(ForeignKey('subsect.id'))
-    subsubsections: Mapped['SubSection'] = relationship(back_populates='subsubsection')
+    # subsection: Mapped['SubSection'] = relationship(back_populates='subsubsections')
+    subsub_products: Mapped[list['Product']] = relationship(back_populates='subsub')
 
 
 class PartNumber(Base):
@@ -84,9 +83,25 @@ class PartNumber(Base):
     part_no: Mapped[str]
     discontinued: Mapped[bool]
     new_release: Mapped[bool]
-    products: Mapped['Product'] = relationship(back_populates='partnumber')  # Same name as field? Without name?
-    masterdata: Mapped['MasterData'] = relationship(back_populates='partnumber')
-    refers: Mapped[List['PartnumReference']] = relationship()
+    product: Mapped['Product'] = relationship()
+    masterdata: Mapped['MasterData'] = relationship()
+    refers: Mapped[list['PartNumber']] = relationship(secondary=partnumber_junction,
+                                                      primaryjoin='PartNumber.id == refers.c.predecessor',
+                                                      secondaryjoin='PartNumber.id == refers.c.successor',)
+    # refers: Mapped[list['PartnumReference']] = relationship(foreign_keys='PartnumReference.predecessor',
+    #                                                         lazy='joined')
+
+# class PartnumReference(Base):
+#     """
+#     Partnum self joining table.
+#     """
+#     __tablename__ = 'refers'
+#
+#     id: Mapped[rowid_pk]
+#     predecessor: Mapped[int] = mapped_column(ForeignKey('partnum.rowid'))
+#     successor: Mapped[int] = mapped_column(ForeignKey('partnum.rowid'))
+#     refer: Mapped['PartNumber'] = relationship(foreign_keys='PartnumReference.successor',
+#                                                lazy='joined')
 
 
 class Product(Base):
@@ -101,13 +116,13 @@ class Product(Base):
     uktzed: Mapped[int]
     min_order: Mapped[int]
     quantity: Mapped[int]
-    price: Mapped[Decimal]
+    price: Mapped[str]
     truck: Mapped[bool]
     id: Mapped[rowid_pk]
     partnum_id: Mapped[partnum_fk]
-    partnum: Mapped['PartNumber'] = relationship()
-    subsub_id: Mapped[int] = mapped_column(ForeignKey('subsub.id'))
-    subsub: Mapped['PartNumber'] = relationship(back_populates='products')
+    # partnum: Mapped['PartNumber'] = relationship(back_populates='product')
+    subsub_id: Mapped[int] = mapped_column(ForeignKey('subsub.rowid'))
+    subsub = relationship('Subsub')
 
 
 class MasterData(Base):
@@ -117,15 +132,15 @@ class MasterData(Base):
     __tablename__ = 'masterdata'
 
     ean: Mapped[int]
-    gross: Mapped[Decimal]
-    net: Mapped[Decimal]
+    gross: Mapped[str]
+    net: Mapped[str]
     weight_unit: Mapped[str]
     length: Mapped[int]
     width: Mapped[int]
     height: Mapped[int]
     measure_unit: Mapped[str]
-    volume: Mapped[Decimal]
+    volume: Mapped[str]
     volume_unit: Mapped[str]
     id: Mapped[rowid_pk]
     partnum_id: Mapped[partnum_fk]
-    partnum: Mapped['PartNumber'] = relationship(back_populates='masterdata')
+    # partnum: Mapped['PartNumber'] = relationship(back_populates='masterdata')
