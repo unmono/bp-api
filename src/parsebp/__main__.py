@@ -6,6 +6,7 @@ from unmonostuff.perfomance_tools import execution_timer
 
 
 def validate_argv(args: list) -> bool:
+    # todo missing argument
     if len(args) != 2:
         raise SystemExit(f'Unknown arguments: {args[2:]}')
     return True

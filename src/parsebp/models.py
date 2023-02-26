@@ -1,5 +1,6 @@
 import re
 
+from decimal import Decimal
 from pydantic import (
     BaseModel,
     validator,
@@ -23,7 +24,7 @@ class BPModel(BaseModel):
     @classmethod
     def sqlite_schema(cls):
         title = cls.sql_title()
-        sql_types = {
+        sqlite_types = {
             'string': 'TEXT',
             'integer': 'INTEGER',
             'bool': 'INTEGER',
@@ -32,7 +33,7 @@ class BPModel(BaseModel):
         for field_title, properties in cls.schema()['properties'].items():
             if not (field_type := properties.get('type')):
                 field_type = properties.get('anyOf')[0]['type']
-            sql_type = sql_types[field_type]
+            sql_type = sqlite_types[field_type]
             list_of_columns.append(f'{field_title} {sql_type}')
         columns_str = ', '.join(list_of_columns)
         return f'CREATE TABLE IF NOT EXISTS {title}({columns_str});'
@@ -71,6 +72,7 @@ class PriceList(BPModel):
     uktzed: Optional[int] = Field(excel_column='I')
     min_order: int = Field(excel_column='J')
     quantity: int = Field(excel_column='K')
+    # price: Decimal = Field(excel_column='M')
     price: constr(
         strip_whitespace=True,
         regex=settings.DECIMAL_PATTERN,

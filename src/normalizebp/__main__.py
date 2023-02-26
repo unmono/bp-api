@@ -38,7 +38,7 @@ def run_normalization(db_filename: str, normalization_filename: str) -> None:
 
 
 if __name__ == '__main__':
-    raw_file = dealing_with_files()
+    file_to_normalize = dealing_with_files()
     normalization_script = get_script()
-    run_normalization(raw_file, normalization_script)
+    run_normalization(file_to_normalize, normalization_script)
 

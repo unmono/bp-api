@@ -26,7 +26,8 @@ CREATE TABLE partnum (
 -- Junction table to reference related partnumbers
 CREATE TABLE refers (
     predecessor INT REFERENCES partnum(rowid),
-    successor INT REFERENCES partnum(rowid)
+    successor INT REFERENCES partnum(rowid),
+    PRIMARY KEY(predecessor, successor)
 );
 -- Empty unrequired tables in case of their absence in the price release
 CREATE TABLE IF NOT EXISTS refs (predecessor TEXT, successor TEXT);
@@ -133,13 +134,30 @@ BEGIN TRANSACTION;
         SELECT successor, 0, 0 FROM refs;
 
     -- Populating junction table for referencing related part numbers
-    INSERT INTO refers
+    INSERT OR IGNORE INTO refers
         SELECT
             p.rowid AS predecessor,
             s.rowid AS successor
         FROM refs
         INNER JOIN partnum p ON refs.predecessor = p.part_no
+        INNER JOIN partnum s ON refs.successor = s.part_no
+
+        UNION
+
+        SELECT
+            s.rowid AS predecessor,
+            p.rowid AS successor
+        FROM refs
+        INNER JOIN partnum p ON refs.predecessor = p.part_no
         INNER JOIN partnum s ON refs.successor = s.part_no;
+
+--    INSERT INTO refers
+--        SELECT
+--            p.rowid AS predecessor,
+--            s.rowid AS successor
+--        FROM refs
+--        INNER JOIN partnum p ON refs.predecessor = p.part_no
+--        INNER JOIN partnum s ON refs.successor = s.part_no;
 
 
     -- Relating pricelist entries to sub-subsections
