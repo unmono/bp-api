@@ -97,6 +97,6 @@ class SearchRequest(BaseModel):
     def convert_search_query(cls, v):
         if not re.match(r'^([A-Z0-9]*[?]?[A-Z0-9]*){0,4}$', v):
             raise ValueError('Use only letters and digits. '
-                                  'You can replace missing character by ? up to 4 times.')
+                             'You can replace missing character by ? up to 4 times.')
         return v.replace('?', '_')
 
