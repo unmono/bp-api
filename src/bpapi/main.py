@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 # import databases - asyncio support for databases
 
@@ -18,6 +19,18 @@ import crud as jr
 
 app = FastAPI()
 
+origins = [
+    'http://localhost:5173',
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=['GET', 'POST'],
+    allow_headers=['*'],
+)
+
 
 def get_db():
     db = database.SessionLocal()
@@ -27,8 +40,9 @@ def get_db():
         db.close()
 
 
-@app.get('/sections', response_model=dict[str, dict[str, list[schemas.Subsub]]])
-def sections(db: Session = Depends(get_db)) -> dict[str, dict[str, list]]:
+@app.get('/sections',
+         response_model=list[dict[str, str | list[dict[str, str | list[schemas.Subsub]]]]])
+def sections(db: Session = Depends(get_db)) -> list[dict[str, str | list[dict[str, str | list[dict]]]]]:
     list_of_subs = jr.get_all_subs(db)
     dict_of_sections = {}
     for pk, title, subsection, section in list_of_subs:
@@ -39,7 +53,16 @@ def sections(db: Session = Depends(get_db)) -> dict[str, dict[str, list]]:
         subsection_dict = dict_of_sections.setdefault(section, {})
         list_of_subsubsections = subsection_dict.setdefault(subsection, [])
         list_of_subsubsections.append(subsub_data)
-    return dict_of_sections
+
+    conv_list = []
+    for section, subsections in dict_of_sections.items():
+        conv_sub_list = [{'title': s, 'subsections': l} for s, l in subsections.items()]
+        conv_list.append({
+            'title': section,
+            'subsections': conv_sub_list,
+        })
+
+    return conv_list
 
 
 @app.get('/sections/{subsub_id}', response_model=list[schemas.ListedPartnums], )
