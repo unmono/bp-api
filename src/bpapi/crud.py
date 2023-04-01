@@ -16,7 +16,7 @@ def get_all_subs(db: Session):
     # return db.query(Subsub.title, ).\
     #     join(SubSection).join(Section).all()
 
-    # This one runs one query but returns redundant data
+    # This one fires single query but returns redundant data
     return db.query(Subsub.id.label('url'),
                     Subsub.title.label('title'),
                     SubSection.title.label('subsection'),
@@ -42,5 +42,6 @@ def get_partnum(db: Session, part_no: str):
 
 
 def search_products(db: Session, query):
-    stmt = select(PartNumber.part_no).where(PartNumber.part_no.like(query))
+    stmt = select(PartNumber.part_no, Product.title_en).\
+        join(Product).where(PartNumber.part_no.like(query))
     return db.execute(stmt).all()
