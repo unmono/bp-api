@@ -1,21 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useLoaderData } from 'react-router-dom';
 
-import { api, bpGet } from "../api/axiosConfig";
 import {SectionType} from "../types";
 import SubSection from "./SubSection";
+import PartnumPlaceholder from "./PartnumPlaceholder";
 
 export default function () {
-  const [sections, setSections] = useState<[SectionType]>();
-
-    useEffect(() => {
-      bpGet('/sections').then(sections => {
-        setSections(sections?.data);
-      })
-    }, []);
+  const sections = useLoaderData() as [SectionType];
 
     const renderSub = (s: SectionType) => {
       const subsections = s.subsections.map(
-        sub => <SubSection {...sub} />
+        sub => <SubSection {...sub} key={`sub${sub.title}`} />
       );
       return (
         <li key={s.title}>
@@ -31,10 +25,7 @@ export default function () {
 
     return (
       <>
-        <div className={'partnum-placeholder'}>
-          Search for product,<br />
-          or select from sections.
-        </div>
+        <PartnumPlaceholder />
         <ul className={'sections'}>
           {sectionBlocks}
         </ul>

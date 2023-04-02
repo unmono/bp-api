@@ -1,17 +1,20 @@
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 
-import { ProductShortType } from "../types";
-import {SubsectionModalContext} from "../App";
+import {ModalContext, SubsectionModalContext} from "../App";
 
-export default function (props: {productList: [ProductShortType]}) {
-  const closeModal = useContext(SubsectionModalContext)
+export default function Modal() {
+  const closeModal = useContext(SubsectionModalContext);
+  const productList = useContext(ModalContext);
 
-  const products = props.productList && props.productList.length > 0
-    ? props.productList.map(pr => {
+  const products = productList && productList.length > 0
+    ? productList.map(pr => {
       return (
         <li key={pr.part_no}>
-          <Link to={`/products/${pr.part_no}`} onClick={closeModal && closeModal()}>
+          <Link
+            to={`/products/${pr.part_no}`}
+            onClick={closeModal && closeModal()}
+          >
             {`${pr.part_no} - ${pr.title_en}`}
           </Link>
         </li>

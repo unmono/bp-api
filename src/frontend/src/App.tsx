@@ -1,25 +1,33 @@
-import React, { useState, useEffect, createContext } from 'react';
-import { Routes, Route, Outlet } from 'react-router-dom';
+import React, { useState, createContext } from 'react';
+import {
+  Outlet,
+  useNavigate,
+} from 'react-router-dom';
 
-import { api, searchPost, bpGet } from './api/axiosConfig';
+import { searchPost, bpGet } from './api/axiosConfig';
 import './index.css';
 import NavBar from "./components/Navbar";
-import Sections from "./components/Sections";
 import Modal from "./components/Modal";
 import {ProductShortType, SearchQuery} from "./types";
-import ProductInfo from "./components/ProductInfo";
 
-export const SubsectionModalContext = createContext<((subUrl?: string) => () => void) | undefined>(undefined);
-export const SearchContext = createContext<((searchQuery: SearchQuery) => void) | null>(null);
+export const SubsectionModalContext =
+  createContext<((subUrl?: string) => () => void) | undefined>(undefined);
+
+export const SearchContext =
+  createContext<((searchQuery: SearchQuery) => void) | null>(null);
+
+export const ModalContext =
+  createContext<[ProductShortType] | null>(null);
 
 function App() {
   const [modalProductsList, setProductsList] = useState<[ProductShortType] | null>(null);
+  const navigate = useNavigate();
 
   const listSubsectionInModal = (subUrl?: string) => () => {
     if(subUrl){
       bpGet(subUrl).then(response => {
-        setProductsList(response?.data);
-      })
+        setProductsList(response);
+      });
     } else {
       setProductsList(null);
     }
@@ -27,38 +35,27 @@ function App() {
 
   const listSearchResultsInModal = (searchQuery: SearchQuery) => {
     searchPost(searchQuery).then(response => {
-      setProductsList(response?.data);
+      if(response.length === 1) {
+        navigate(`/products/${response[0].part_no}`);
+        return;
+      }
+      setProductsList(response);
     })
   }
 
   return (
     <SubsectionModalContext.Provider value={ listSubsectionInModal }>
     <SearchContext.Provider value={ listSearchResultsInModal }>
-      <Routes>
-        <Route path={'/'} element={<Layout productList={modalProductsList} />}>
-          <Route index element={<Sections />} />
-          <Route path={'products/:partNum'} element={<ProductInfo />} />
-        </Route>
-      </Routes>
+    <ModalContext.Provider value={modalProductsList} >
+      <div className={'layout'}>
+        <NavBar />
+        <Outlet />
+        {modalProductsList && <Modal/>}
+      </div>
+    </ModalContext.Provider>
     </SearchContext.Provider>
     </SubsectionModalContext.Provider>
   )
 }
 
-function Layout(props: { productList: [ProductShortType] | null }) {
-  return (
-    <div className={'layout'}>
-      <NavBar />
-      <Outlet />
-      { props.productList && <Modal productList={ props.productList } /> }
-    </div>
-  );
-}
-
 export default App;
-
-// todo:
-//  - error for partnum
-//  - api calls error handling
-//  - error page
-//

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLoaderData } from 'react-router-dom';
 
 import {
   MasterDataType,
@@ -10,25 +10,10 @@ import {
 import {bpGet} from "../api/axiosConfig";
 
 export default function ProductInfo () {
-  const [part, setPart] = useState<PartType | null>(null);
-  const {partNum} = useParams<string>();
-
-  const validatePartnum = (value: string) => {
-    const re = new RegExp(/^[A-Z0-9]{10}$/);
-    return re.test(value);
-  }
+  const part = useLoaderData() as PartType;
 
   const boschThisNumber = (v: string) =>
     `${v.slice(0, 1)} ${v.slice(1, 4)} ${v.slice(4, 7)} ${v.slice(7, 10)}`;
-
-  useEffect(() => {
-    if(partNum && validatePartnum(partNum)) {
-      bpGet(`/products/${partNum}`).
-        then(res => {
-          setPart(res?.data);
-      })
-    }
-  }, [partNum])
 
   return (
     <>
