@@ -89,7 +89,7 @@ BEGIN TRANSACTION;
     -- The same way in subsub string we have:
     -- 1.1.1 Subsub title
     -- First and second characters forms a 101 like in subsection table
-    -- Don't need predefined pk here, but the initial string needs to be saved
+    -- Don't need predefined pk here, but the initial string has to be saved
     -- to relate pricelist entries.
     WITH subsub_dividers AS(
         SELECT
@@ -196,3 +196,5 @@ ALTER TABLE masterdata DROP COLUMN part_no;
 DROP TABLE newrelease;
 DROP TABLE discontinued;
 DROP TABLE refs;
+
+-- todo: Delete duplicats!
