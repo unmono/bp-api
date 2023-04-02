@@ -6,7 +6,7 @@ from contextlib import closing
 from unmonostuff.perfomance_tools import execution_timer
 
 
-from settings import ParseSettings
+from parse_settings import ParseSettings
 settings = ParseSettings()
 
 

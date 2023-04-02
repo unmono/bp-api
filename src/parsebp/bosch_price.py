@@ -16,7 +16,7 @@ from parsebp.models import (
 )
 
 
-from settings import ParseSettings
+from parse_settings import ParseSettings
 settings = ParseSettings()
 
 

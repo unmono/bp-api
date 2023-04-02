@@ -10,7 +10,7 @@ from pydantic import (
 from typing import ClassVar, Any, Optional
 
 
-from settings import ParseSettings
+from parse_settings import ParseSettings
 settings = ParseSettings()
 
 
