@@ -9,3 +9,11 @@ engine = create_engine(
     echo=True,
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def db_session():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

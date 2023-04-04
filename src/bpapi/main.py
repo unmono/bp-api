@@ -1,86 +1,71 @@
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from collections import defaultdict
+from typing import Annotated
+from fastapi import Depends, HTTPException, Path
 from sqlalchemy.orm import Session
 # import databases - asyncio support for databases
 
-import database
+from app import app
 import schemas
-import models
-import crud as jr
+import crud
+from database import db_session
 
-# from . import (
-#     database,
-#     schemas,
-#     models,
-#     crud as jr,
-# ) ...although, if it's not unique, or your package structure is more complex,
-# you'll need to include the directory containing your package directory in
-# PYTHONPATH, and do it like this... from stackoverflow
-
-app = FastAPI()
-
-origins = [
-    'http://localhost:5173',
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=['GET', 'POST'],
-    allow_headers=['*'],
-)
-
-
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+from settings import ApiSettings
+settings = ApiSettings()
 
 
 @app.get('/sections',
-         response_model=list[dict[str, str | list[dict[str, str | list[schemas.Subsub]]]]])
-def sections(db: Session = Depends(get_db)) -> list[dict[str, str | list[dict[str, str | list[dict]]]]]:
-    list_of_subs = jr.get_all_subs(db)
-    dict_of_sections = {}
-    for pk, title, subsection, section in list_of_subs:
-        subsub_data = {
-            'url': app.url_path_for('products_by_subsub', subsub_id=pk),
-            'title': title,
-        }
-        subsection_dict = dict_of_sections.setdefault(section, {})
-        list_of_subsubsections = subsection_dict.setdefault(subsection, [])
-        list_of_subsubsections.append(subsub_data)
+         tags=['Sections'],
+         response_model=list[schemas.Section])
+async def sections(db: Session = Depends(db_session)) -> list[schemas.Section]:
+    # [(pk, title, subsection, section), ...]
+    fetched_list_of_groups = crud.get_all_groups(db)
 
-    conv_list = []
-    for section, subsections in dict_of_sections.items():
-        conv_sub_list = [{'title': s, 'subsections': l} for s, l in subsections.items()]
-        conv_list.append({
-            'title': section,
-            'subsections': conv_sub_list,
-        })
+    # {section1: {subsection1: [sub_subsection1, ...], ...}, ...}
+    dict_of_sections = defaultdict(lambda: defaultdict(list))
 
-    return conv_list
+    for pk, title, subsection, section in fetched_list_of_groups:
+        group = schemas.Group(
+            id=pk,
+            # relative_url=app.url_path_for('products_by_group', group_id=pk),
+            title=title,
+        )
+        dict_of_sections[section][subsection].append(group)
+
+    return [schemas.Section(title=section, subsections=[
+        schemas.Section(title=subsection, subsections=group_list)
+        for subsection, group_list in subsection_dict.items()
+    ]) for section, subsection_dict in dict_of_sections.items()]
 
 
-@app.get('/sections/{subsub_id}', response_model=list[schemas.ListedPartnums], )
-def products_by_subsub(subsub_id: int, db: Session = Depends(get_db)):
-    list_of_products = jr.get_products_by_subsub(db, subsub_id)
+@app.get('/sections/{group_id}',
+         tags=['Products'],
+         response_model=list[schemas.ListedPartnums])
+async def products_by_group(group_id: int = Path(title='The ID of group of products.', ge=0),
+                            db: Session = Depends(db_session)):
+    list_of_products = crud.get_products_by_group(db, group_id)
     return list_of_products
 
 
-@app.get('/products/{part_number}', response_model=schemas.PartNumber)
-def product(part_number: str, db: Session = Depends(get_db)):
-    p = jr.get_partnum(db, part_no=part_number)
+@app.get('/products/{part_number}',
+         tags=['Products'],
+         response_model=schemas.PartNumber)
+async def product(part_number: str = Path(title='Valid Bosch part number.', regex=r'^[a-zA-Z0-9]{10}$'),
+                  db: Session = Depends(db_session)):
+    p = crud.get_partnum(db, part_no=part_number.upper())
     if not p:
-        raise HTTPException(status_code=404, detail='Product nof found.')
+        raise HTTPException(status_code=404, detail='No such product')
     return p
 
 
-@app.post('/search/', response_model=list[schemas.ListedPartnums])
-async def search(search_request: schemas.SearchRequest, db: Session = Depends(get_db)):
+@app.post('/products/search',
+          tags=['Products'],
+          response_model=list[schemas.ListedPartnums])
+async def search(search_request: schemas.SearchRequest, db: Session = Depends(db_session)):
     query = search_request.search_query
-    results = jr.search_products(db, query)
+    results = crud.search_products(db, query)
     return results
+
+
+# todo:
+#  - Status codes
+#  - host path

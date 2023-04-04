@@ -1,9 +1,10 @@
 from pydantic import (
     BaseSettings,
-    AnyUrl
+    AnyHttpUrl
 )
 
 
-class Settings(BaseSettings):
-    route_prefix: AnyUrl = '/api/v1'
+class ApiSettings(BaseSettings):
+    host: str = 'http://localhost:8000'
+    route_prefix: str = '/api/v1'
 

@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from models import (
-    Subsub,
+    Group,
     Section,
     SubSection,
     PartNumber,
@@ -10,25 +10,25 @@ from models import (
 )
 
 
-def get_all_subs(db: Session):
+def get_all_groups(db: Session):
     # These run multiple queries:
     # return db.query(Section).all()
     # return db.query(Subsub.title, ).\
     #     join(SubSection).join(Section).all()
 
     # This one fires single query but returns redundant data
-    return db.query(Subsub.id.label('url'),
-                    Subsub.title.label('title'),
+    return db.query(Group.id.label('url'),
+                    Group.title.label('title'),
                     SubSection.title.label('subsection'),
                     Section.title.label('section')).\
-        select_from(Subsub).join(SubSection).join(Section).all()
+        select_from(Group).join(SubSection).join(Section).all()
 
 
-def get_products_by_subsub(db: Session, subsub_id: int):
+def get_products_by_group(db: Session, group_id: int):
     return db.query(PartNumber.part_no, Product.title_en).\
         select_from(Product).\
         join(PartNumber).\
-        filter(Product.subsub_id == subsub_id).all()
+        filter(Product.subsub_id == group_id).all()
 
 
 def get_partnum(db: Session, part_no: str):

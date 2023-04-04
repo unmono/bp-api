@@ -10,6 +10,7 @@ import NavBar from "./components/Navbar";
 import Modal from "./components/Modal";
 import {ProductShortType, SearchQuery} from "./types";
 
+
 export const SubsectionModalContext =
   createContext<((subUrl?: string) => () => void) | undefined>(undefined);
 
@@ -18,6 +19,7 @@ export const SearchContext =
 
 export const ModalContext =
   createContext<[ProductShortType] | null>(null);
+
 
 function App() {
   const [modalProductsList, setProductsList] = useState<[ProductShortType] | null>(null);

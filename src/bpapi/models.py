@@ -6,7 +6,6 @@ from sqlalchemy import (
     Integer,
     Table,
     Column,
-    DECIMAL,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -57,7 +56,7 @@ class SubSection(Base):
     # subsubsections: Mapped[list['Subsub']] = relationship(back_populates='subsection')
 
 
-class Subsub(Base):
+class Group(Base):
     """
     Subsubsection of Bosch catalogue heirarchy. Refers to Subsection.
     """
@@ -67,7 +66,7 @@ class Subsub(Base):
     title: Mapped[str]
     subsect_id: Mapped[int] = mapped_column(ForeignKey('subsect.id'))
     # subsection: Mapped['SubSection'] = relationship(back_populates='subsubsections')
-    subsub_products: Mapped[list['Product']] = relationship(back_populates='subsub')
+    subsub_products: Mapped[list['Product']] = relationship(back_populates='group')
 
 
 class PartNumber(Base):
@@ -122,7 +121,7 @@ class Product(Base):
     partnum_id: Mapped[partnum_fk]
     # partnum: Mapped['PartNumber'] = relationship(back_populates='product')
     subsub_id: Mapped[int] = mapped_column(ForeignKey('subsub.rowid'))
-    subsub = relationship('Subsub')
+    group = relationship('Group')
 
 
 class MasterData(Base):

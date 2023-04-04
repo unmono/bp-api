@@ -1,5 +1,7 @@
+from __future__ import annotations
 import re
 from decimal import Decimal
+from typing import ClassVar
 from pydantic import (
     BaseModel,
     AnyUrl,
@@ -7,25 +9,40 @@ from pydantic import (
     root_validator,
     constr,
     Field,
+    PrivateAttr
 )
 from pydantic.dataclasses import dataclass
 
+from app import app
+import settings
+settings = settings.ApiSettings()
 
-class Subsub(BaseModel):
-    url: AnyUrl | None
+
+class Group(BaseModel):
+    id: int
+    relative_url: str | None
     title: str
 
-    @validator('url', pre=True)
-    def make_url(cls, router_path: str) -> str:
-        """
-        Transform relative path to absolute
-        :param router_path: relative url from FastAPI.url_path_for()
-        :return: absolute url
-        """
-        return f'http://localhost:8000{router_path}'
+    # @validator('relative_url', pre=True)
+    # def make_url(cls, router_path: str) -> str:
+    #     """
+    #     Transform relative path to absolute
+    #     :param router_path: relative url from FastAPI.url_path_for()
+    #     :return: absolute url
+    #     """
+
+    @root_validator
+    def make_url(cls, values):
+        values['relative_url'] = app.url_path_for('products_by_group', group_id=values['id'])
+        return values
 
     class Config:
         orm_mode = True
+
+
+class Section(BaseModel):
+    title: str
+    subsections: list[Section | Group]
 
 
 class ListedPartnums(BaseModel):
@@ -51,7 +68,7 @@ class Product(BaseModel):
     quantity: int
     price: Decimal
     truck: bool
-    subsub: Subsub
+    group: Group
 
     class Config:
         orm_mode = True
