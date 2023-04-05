@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useLoaderData } from 'react-router-dom';
 
 import {
@@ -7,6 +7,7 @@ import {
   ProductShortType,
   ProductType
 } from "../types";
+import {SubsectionModalContext} from '../contexts';
 import {bpGet} from "../api/axiosConfig";
 
 export default function ProductInfo () {
@@ -46,6 +47,7 @@ export default function ProductInfo () {
 }
 
 const GeneralInfo = (props: ProductType) => {
+  const listGroupInModal = useContext(SubsectionModalContext);
 
   return(
     <table className={'product-info-table'}>
@@ -85,7 +87,9 @@ const GeneralInfo = (props: ProductType) => {
         </tr>
         <tr>
           <td>Section</td>
-          <td>{props.subsub.title}</td>
+          <td>
+            <a href={'#'} onClick={listGroupInModal && listGroupInModal(props.group.path)}>{props.group.title}</a>
+          </td>
         </tr>
       </tbody>
     </table>

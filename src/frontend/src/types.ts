@@ -1,6 +1,6 @@
 export interface SubSubSectionType {
   title: string;
-  url: string;
+  path: string;
 }
 
 export interface SubSectionType {
@@ -18,9 +18,9 @@ export interface SearchQuery {
 }
 
 export interface ProductShortType {
-  url: string;
   part_no: string;
   title_en: string;
+  path: string;
 }
 
 export interface ProductType {
@@ -31,7 +31,7 @@ export interface ProductType {
   quantity: number;
   price: number;
   truck: boolean;
-  subsub: SubSubSectionType;
+  group: SubSubSectionType;
 }
 
 export interface MasterDataType {

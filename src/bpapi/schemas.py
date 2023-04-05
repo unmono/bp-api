@@ -1,7 +1,7 @@
 from __future__ import annotations
 import re
 from decimal import Decimal
-from typing import ClassVar
+from typing import ClassVar, TypeAlias
 from pydantic import (
     BaseModel,
     AnyUrl,
@@ -19,21 +19,15 @@ settings = settings.ApiSettings()
 
 
 class Group(BaseModel):
-    id: int
-    relative_url: str | None
+    id: int = Field(exclude=True)
     title: str
-
-    # @validator('relative_url', pre=True)
-    # def make_url(cls, router_path: str) -> str:
-    #     """
-    #     Transform relative path to absolute
-    #     :param router_path: relative url from FastAPI.url_path_for()
-    #     :return: absolute url
-    #     """
+    path: str | None
 
     @root_validator
     def make_url(cls, values):
-        values['relative_url'] = app.url_path_for('products_by_group', group_id=values['id'])
+        path_with_prefix = app.url_path_for('products_by_group', group_id=values['id'])
+        path = '/' + '/'.join(path_with_prefix.split('/')[3:])
+        values['path'] = path
         return values
 
     class Config:
@@ -41,19 +35,21 @@ class Group(BaseModel):
 
 
 class Section(BaseModel):
+
     title: str
     subsections: list[Section | Group]
 
 
 class ListedPartnums(BaseModel):
-    url: AnyUrl | None
     part_no: str
     title_en: str | None
+    path: str | None
 
     @root_validator
     def make_url(cls, values):
-        part_no = values['part_no']
-        values['url'] = f'http://localhost:8000/products/{part_no}'
+        path_with_prefix = app.url_path_for('product', part_number=values['part_no'])
+        path = '/' + '/'.join(path_with_prefix.split('/')[3:])
+        values['path'] = path
         return values
 
     class Config:

@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 
-import {ModalContext, SubsectionModalContext} from "../App";
+import {ModalContext, SubsectionModalContext} from "../contexts";
 
 export default function Modal() {
   const closeModal = useContext(SubsectionModalContext);
@@ -12,7 +12,7 @@ export default function Modal() {
       return (
         <li key={pr.part_no}>
           <Link
-            to={`/products/${pr.part_no}`}
+            to={pr.path}
             onClick={closeModal && closeModal()}
           >
             {`${pr.part_no} - ${pr.title_en}`}

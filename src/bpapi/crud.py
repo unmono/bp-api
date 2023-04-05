@@ -17,7 +17,7 @@ def get_all_groups(db: Session):
     #     join(SubSection).join(Section).all()
 
     # This one fires single query but returns redundant data
-    return db.query(Group.id.label('url'),
+    return db.query(Group.id.label('id'),
                     Group.title.label('title'),
                     SubSection.title.label('subsection'),
                     Section.title.label('section')).\

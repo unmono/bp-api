@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import {SearchContext} from "../App";
+import {SearchContext} from "../contexts";
 
 export default function () {
   const [searchInput, setSearchInput] = useState('');

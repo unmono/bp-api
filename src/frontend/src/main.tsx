@@ -30,7 +30,7 @@ const routes = (
       errorElement={<ErrorComponent />}
     />
     <Route
-      path={'products/:partNum'}
+      path={'/products/:partNum'}
       loader={
         async ({params}) => {
           if(params.partNum && validatePartnum(params.partNum)) {

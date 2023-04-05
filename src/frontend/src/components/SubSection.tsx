@@ -1,14 +1,14 @@
 import React, { useContext } from 'react';
 
 import {SubSectionType} from "../types";
-import {SubsectionModalContext} from "../App";
+import {SubsectionModalContext} from "../contexts";
 
 export default function (props: SubSectionType) {
   const listSubsectionInModal = useContext(SubsectionModalContext);
 
   const subSectionLinks = props.subsections.map(s => {
-    return <li key={`subsub${s.url}`}>
-      <a onClick={ listSubsectionInModal &&  listSubsectionInModal(s.url) }>{s.title}</a>
+    return <li key={`subsub${s.path}`}>
+      <a onClick={ listSubsectionInModal && listSubsectionInModal(s.path) }>{s.title}</a>
     </li>
   });
 

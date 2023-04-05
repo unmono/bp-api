@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Annotated
+from typing import Annotated, Any
 from fastapi import Depends, HTTPException, Path
 from sqlalchemy.orm import Session
 # import databases - asyncio support for databases
@@ -16,7 +16,7 @@ settings = ApiSettings()
 @app.get('/sections',
          tags=['Sections'],
          response_model=list[schemas.Section])
-async def sections(db: Session = Depends(db_session)) -> list[schemas.Section]:
+async def sections(db: Session = Depends(db_session)) -> list[Any]:
     # [(pk, title, subsection, section), ...]
     fetched_list_of_groups = crud.get_all_groups(db)
 
@@ -24,17 +24,16 @@ async def sections(db: Session = Depends(db_session)) -> list[schemas.Section]:
     dict_of_sections = defaultdict(lambda: defaultdict(list))
 
     for pk, title, subsection, section in fetched_list_of_groups:
-        group = schemas.Group(
-            id=pk,
-            # relative_url=app.url_path_for('products_by_group', group_id=pk),
-            title=title,
-        )
+        group = {
+            'id': pk,
+            'title': title,
+        }
         dict_of_sections[section][subsection].append(group)
 
-    return [schemas.Section(title=section, subsections=[
-        schemas.Section(title=subsection, subsections=group_list)
-        for subsection, group_list in subsection_dict.items()
-    ]) for section, subsection_dict in dict_of_sections.items()]
+    return [{'title': section, 'subsections': [
+        {'title': subsection, 'subsections': groups_list}
+        for subsection, groups_list in subsection_dict.items()
+    ]} for section, subsection_dict in dict_of_sections.items()]
 
 
 @app.get('/sections/{group_id}',

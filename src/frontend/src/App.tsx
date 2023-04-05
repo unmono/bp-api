@@ -9,16 +9,11 @@ import './index.css';
 import NavBar from "./components/Navbar";
 import Modal from "./components/Modal";
 import {ProductShortType, SearchQuery} from "./types";
-
-
-export const SubsectionModalContext =
-  createContext<((subUrl?: string) => () => void) | undefined>(undefined);
-
-export const SearchContext =
-  createContext<((searchQuery: SearchQuery) => void) | null>(null);
-
-export const ModalContext =
-  createContext<[ProductShortType] | null>(null);
+import {
+  SubsectionModalContext,
+  SearchContext,
+  ModalContext,
+} from './contexts';
 
 
 function App() {
