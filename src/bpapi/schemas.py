@@ -32,6 +32,12 @@ class Group(BaseModel):
 
     class Config:
         orm_mode = True
+        schema_extra = {
+            'example': {
+                'title': 'Group title',
+                'path': '/path_to_related_products/without/api/version'
+            }
+        }
 
 
 class Section(BaseModel):
@@ -39,11 +45,29 @@ class Section(BaseModel):
     title: str
     subsections: list[Section | Group]
 
+    class Config:
+        schema_extra = {
+            'example': {
+                'title': 'Section title',
+                'subsections': [
+                    {
+                        'title': 'Subsection title',
+                        'subsections': [
+                            {
+                                'title': 'Group title',
+                                'path': '/path_to_related_products/without/api/version'
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+
 
 class ListedPartnums(BaseModel):
-    part_no: str
-    title_en: str | None
-    path: str | None
+    part_no: str = Field(example='AZ0910CHAR')
+    title_en: str | None = Field(example='Product english description. \'None\' in case of refers list')
+    path: str | None = Field(example='/path_to_detail/without/api/version')
 
     @root_validator
     def make_url(cls, values):
