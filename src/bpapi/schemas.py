@@ -128,7 +128,7 @@ class SearchRequest(BaseModel):
         to_upper=True,
         min_length=10,
         max_length=10
-    )
+    ) = Field(example='AZ0910????')
 
     @validator('search_query')
     def convert_search_query(cls, v):
