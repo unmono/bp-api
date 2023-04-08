@@ -9,7 +9,8 @@ from pydantic import (
     root_validator,
     constr,
     Field,
-    PrivateAttr
+    PrivateAttr,
+    ValidationError
 )
 from pydantic.dataclasses import dataclass
 
@@ -137,3 +138,7 @@ class SearchRequest(BaseModel):
                              'You can replace missing character by ? up to 4 times.')
         return v.replace('?', '_')
 
+
+class ValidationErrorSchema(BaseModel):
+    loc: str = Field(example='field_caused_an_error')
+    msg: str = Field(example='Error message')
