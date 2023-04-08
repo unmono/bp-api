@@ -1,6 +1,14 @@
+import re
 from collections import defaultdict
 from typing import Annotated, Any
-from fastapi import Depends, HTTPException, Path
+
+from fastapi import Depends, Path, status
+from fastapi.responses import PlainTextResponse, JSONResponse
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import HTTPException, RequestValidationError
+from starlette.exceptions import HTTPException as StartletteHTTPException
+from fastapi.exception_handlers import http_exception_handler
+
 from sqlalchemy.orm import Session
 # import databases - asyncio support for databases
 
@@ -13,10 +21,25 @@ from settings import ApiSettings
 settings = ApiSettings()
 
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception(request, exc: RequestValidationError) -> JSONResponse:
+    error_messages = [schemas.ValidationErrorSchema(
+        loc=err['loc'][-1],
+        msg=err['msg'].capitalize(),
+    ) for err in exc.errors()]
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=jsonable_encoder({'detail': error_messages})
+    )
+
+
 @app.get('/sections',
          tags=['Sections'],
          response_model=list[schemas.Section])
-async def sections(db: Session = Depends(db_session)) -> list[Any]:
+async def sections(db: Session = Depends(db_session)):
+    """
+    Docstring
+    """
     # [(pk, title, subsection, section), ...]
     fetched_list_of_groups = crud.get_all_groups(db)
 
@@ -30,17 +53,27 @@ async def sections(db: Session = Depends(db_session)) -> list[Any]:
         }
         dict_of_sections[section][subsection].append(group)
 
+    # If models are defined, the instances are created twice as well as validation's run.
     return [{'title': section, 'subsections': [
         {'title': subsection, 'subsections': groups_list}
         for subsection, groups_list in subsection_dict.items()
     ]} for section, subsection_dict in dict_of_sections.items()]
 
 
+# Thus it won't be in sections openapi docs
+app.router.responses = {422: {'model': list[schemas.ValidationErrorSchema]}}
+
+
 @app.get('/sections/{group_id}',
-         tags=['Products'],
-         response_model=list[schemas.ListedPartnums])
-async def products_by_group(group_id: int = Path(title='The ID of group of products.', ge=0),
-                            db: Session = Depends(db_session)):
+         tags=['Products'])
+async def products_by_group(group_id: int = Path(title='The ID of group of products.', ge=1),
+                            db: Session = Depends(db_session)) -> list[schemas.ListedPartnums]:
+    """
+    Docstring here because declaration is a mess...
+    :param group_id:
+    :param db:
+    :return:
+    """
     list_of_products = crud.get_products_by_group(db, group_id)
     return list_of_products
 
@@ -48,8 +81,22 @@ async def products_by_group(group_id: int = Path(title='The ID of group of produ
 @app.get('/products/{part_number}',
          tags=['Products'],
          response_model=schemas.PartNumber)
-async def product(part_number: str = Path(title='Valid Bosch part number.', regex=r'^[a-zA-Z0-9]{10}$'),
-                  db: Session = Depends(db_session)):
+async def product(part_number: str, db: Session = Depends(db_session)):
+    """
+    Docstring
+    :param part_number:
+    :param db:
+    :return:
+    """
+    if not re.fullmatch(r'[a-zA-Z0-9]{10}', part_number):
+        raise HTTPException(
+            status_code=422,
+            detail=[jsonable_encoder(schemas.ValidationErrorSchema(
+                loc='part_number',
+                msg='Enter a valid Bosch part number'
+            )), ]
+        )
+
     p = crud.get_partnum(db, part_no=part_number.upper())
     if not p:
         raise HTTPException(status_code=404, detail='No such product')
@@ -60,11 +107,20 @@ async def product(part_number: str = Path(title='Valid Bosch part number.', rege
           tags=['Products'],
           response_model=list[schemas.ListedPartnums])
 async def search(search_request: schemas.SearchRequest, db: Session = Depends(db_session)):
-    query = search_request.search_query
-    results = crud.search_products(db, query)
+    """
+    Docstring
+    :param search_request:
+    :param db:
+    :return:
+    """
+    results = crud.search_products(db, search_request.search_query)
     return results
 
 
 # todo:
-#  - Status codes
+#  - Status codes:
+#       200 ok
+#       422 validation error - raise by validators, catch in handler, convert to only code and detail msg
+#       500 server error
+#       404s - raise from views, reraise in handler
 #  - host path
