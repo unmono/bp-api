@@ -38,8 +38,9 @@ async def validation_exception(request, exc: RequestValidationError) -> JSONResp
          response_model=list[schemas.Section])
 async def sections(db: Session = Depends(db_session)):
     """
-    Docstring
+    Complete list of sections, subsections and group in current Bosch price.
     """
+
     # [(pk, title, subsection, section), ...]
     fetched_list_of_groups = crud.get_all_groups(db)
 
@@ -69,11 +70,9 @@ app.router.responses = {422: {'model': list[schemas.ValidationErrorSchema]}}
 async def products_by_group(group_id: int = Path(title='The ID of group of products.', ge=1),
                             db: Session = Depends(db_session)) -> list[schemas.ListedPartnums]:
     """
-    Docstring here because declaration is a mess...
-    :param group_id:
-    :param db:
-    :return:
+    List of products in selected calatogue group.
     """
+
     list_of_products = crud.get_products_by_group(db, group_id)
     return list_of_products
 
@@ -83,10 +82,7 @@ async def products_by_group(group_id: int = Path(title='The ID of group of produ
          response_model=schemas.PartNumber)
 async def product(part_number: str, db: Session = Depends(db_session)):
     """
-    Docstring
-    :param part_number:
-    :param db:
-    :return:
+    Detail catalogue info for the requested product.
     """
     if not re.fullmatch(r'[a-zA-Z0-9]{10}', part_number):
         raise HTTPException(
@@ -108,19 +104,12 @@ async def product(part_number: str, db: Session = Depends(db_session)):
           response_model=list[schemas.ListedPartnums])
 async def search(search_request: schemas.SearchRequest, db: Session = Depends(db_session)):
     """
-    Docstring
-    :param search_request:
-    :param db:
-    :return:
+    Search for specific part number in Bosch catalogue.
     """
     results = crud.search_products(db, search_request.search_query)
     return results
 
 
 # todo:
-#  - Status codes:
-#       200 ok
-#       422 validation error - raise by validators, catch in handler, convert to only code and detail msg
-#       500 server error
-#       404s - raise from views, reraise in handler
 #  - host path
+#  - async db
