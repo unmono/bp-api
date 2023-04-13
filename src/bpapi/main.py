@@ -1,24 +1,88 @@
 import re
+from datetime import timedelta, datetime
 from collections import defaultdict
-from typing import Annotated, Any
+from typing import Annotated
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 
 from fastapi import Depends, Path, status
-from fastapi.responses import PlainTextResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException, RequestValidationError
-from starlette.exceptions import HTTPException as StartletteHTTPException
-from fastapi.exception_handlers import http_exception_handler
+from fastapi.security import (
+    OAuth2PasswordRequestForm,
+    OAuth2PasswordBearer
+)
 
 from sqlalchemy.orm import Session
-# import databases - asyncio support for databases
+# import databases - asyncio support for databases. Doesn't support sqlalchemy2.
 
 from app import app
 import schemas
 import crud
 from database import db_session
+from users import users
 
 from settings import ApiSettings
 settings = ApiSettings()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/api/v1/login')
+pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+
+
+def get_user(username,
+             stored_users: dict[str: dict] = users) -> schemas.UserValidation | None:
+    return schemas.UserValidation(**stored_users[username]) \
+        if username in stored_users \
+        else None
+
+
+def authenticate_user(username: str,
+                      password: str) -> schemas.UserValidation:
+    """
+
+    :param username:
+    :param password:
+    :return:
+    """
+    if (user := get_user(username)) is not None:
+        if pwd_context.verify(password, user.hashed_password):
+            return user
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail='Incorrect username or password'
+    )
+
+
+def create_token(user_data: dict, expires_delta: timedelta = timedelta(hours=1)):
+    """
+
+    :param user_data:
+    :param expires_delta:
+    :return:
+    """
+    data_to_encode = user_data.copy()
+    expire = datetime.utcnow() + expires_delta
+    data_to_encode.update({'exp': expire})
+    return jwt.encode(data_to_encode, settings.AUTH_KEY, algorithm=settings.AUTH_ALG)
+
+
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> schemas.User:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail='Invalid credentials',
+        headers={'WWW-Authenticate': 'Bearer'}
+    )
+    try:
+        payload = jwt.decode(token, settings.AUTH_KEY, algorithms=[settings.AUTH_ALG, ])
+        if username := payload.get('sub') is None:
+            raise credentials_exception
+        if user := get_user(username) is None:
+            raise credentials_exception
+    # ExpiredSignatureError - subclass of JWTError
+    except JWTError:
+        raise credentials_exception
+    return user
 
 
 @app.exception_handler(RequestValidationError)
@@ -33,10 +97,14 @@ async def validation_exception(request, exc: RequestValidationError) -> JSONResp
     )
 
 
-@app.get('/sections',
+LoggedUserDependency = Annotated[schemas.User, Depends(get_current_user)]
+
+
+@app.get('/sections/',
          tags=['Sections'],
          response_model=list[schemas.Section])
-async def sections(db: Session = Depends(db_session)):
+async def sections(user: LoggedUserDependency,
+                   db: Session = Depends(db_session)):
     """
     Complete list of sections, subsections and group in current Bosch price.
     """
@@ -65,9 +133,10 @@ async def sections(db: Session = Depends(db_session)):
 app.router.responses = {422: {'model': list[schemas.ValidationErrorSchema]}}
 
 
-@app.get('/sections/{group_id}',
+@app.get('/sections/{group_id}/',
          tags=['Products'])
-async def products_by_group(group_id: int = Path(title='The ID of group of products.', ge=1),
+async def products_by_group(user: LoggedUserDependency,
+                            group_id: int = Path(title='The ID of group of products.', ge=1),
                             db: Session = Depends(db_session)) -> list[schemas.ListedPartnums]:
     """
     List of products in selected calatogue group.
@@ -77,10 +146,11 @@ async def products_by_group(group_id: int = Path(title='The ID of group of produ
     return list_of_products
 
 
-@app.get('/products/{part_number}',
+@app.get('/products/{part_number}/',
          tags=['Products'],
          response_model=schemas.PartNumber)
-async def product(part_number: str, db: Session = Depends(db_session)):
+async def product(user: LoggedUserDependency,
+                  part_number: str, db: Session = Depends(db_session)):
     """
     Detail catalogue info for the requested product.
     """
@@ -99,10 +169,12 @@ async def product(part_number: str, db: Session = Depends(db_session)):
     return p
 
 
-@app.post('/products/search',
+@app.post('/products/search/',
           tags=['Products'],
           response_model=list[schemas.ListedPartnums])
-async def search(search_request: schemas.SearchRequest, db: Session = Depends(db_session)):
+async def search(user: LoggedUserDependency,
+                 search_request: schemas.SearchRequest,
+                 db: Session = Depends(db_session)):
     """
     Search for specific part number in Bosch catalogue.
     """
@@ -110,6 +182,12 @@ async def search(search_request: schemas.SearchRequest, db: Session = Depends(db
     return results
 
 
-# todo:
-#  - host path
-#  - async db
+@app.post('/login/', tags=['Auth'], response_model=schemas.Token)
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+    user = authenticate_user(form_data.username, form_data.password)
+    token_expire_delta = timedelta(hours=settings.TOKEN_EXPIRE_HOURS)
+    token = create_token(
+        user_data={'sub': user.username},
+        expires_delta=token_expire_delta,
+    )
+    return schemas.Token(access_token=token, token_type='bearer')

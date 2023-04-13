@@ -7,7 +7,8 @@ class ParseSettings(BaseSettings):
     RAW_DB: str = './raw.sqlite'
 
     # Path to normalized bp db
-    NORMALIZED_DB: str = './bp.sqlite'
+    NORMALIZED_DB_NAME: str = 'bp.sqlite'
+    NORMALIZED_DB: str = f'./{NORMALIZED_DB_NAME}'
 
     # Normalization script
     NORMALIZATION_SCRIPT: str = './bp_normalization.sql'

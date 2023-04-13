@@ -142,3 +142,16 @@ class SearchRequest(BaseModel):
 class ValidationErrorSchema(BaseModel):
     loc: str = Field(example='field_caused_an_error')
     msg: str = Field(example='Error message')
+
+
+class User(BaseModel):
+    username: str
+
+
+class UserValidation(User):
+    hashed_password: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str

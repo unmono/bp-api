@@ -5,16 +5,12 @@ from settings import ApiSettings
 settings = ApiSettings()
 
 app = FastAPI()
-app.router.prefix = settings.route_prefix
-
-origins = [
-    'http://localhost:5173',
-]
+app.router.prefix = settings.ROUTE_PREFIX
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.CORS_ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=['GET', 'POST'],
-    allow_headers=['*'],
+    allow_methods=settings.CORS_ALLOWED_METHODS,
+    allow_headers=settings.CORS_ALLOWED_HEADERS,
 )
