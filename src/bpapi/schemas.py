@@ -14,7 +14,7 @@ from pydantic import (
 )
 from pydantic.dataclasses import dataclass
 
-from app import app
+# from main import app
 import settings
 settings = settings.ApiSettings()
 
@@ -26,7 +26,8 @@ class Group(BaseModel):
 
     @root_validator
     def make_url(cls, values):
-        path_with_prefix = app.url_path_for('products_by_group', group_id=values['id'])
+        # path_with_prefix = app.url_path_for('products_by_group', group_id=values['id'])
+        path_with_prefix = f"/api/v1/sections/{values['id']}"
         path = '/' + '/'.join(path_with_prefix.split('/')[3:])
         values['path'] = path
         return values
@@ -72,7 +73,8 @@ class ListedPartnums(BaseModel):
 
     @root_validator
     def make_url(cls, values):
-        path_with_prefix = app.url_path_for('product', part_number=values['part_no'])
+        # path_with_prefix = app.url_path_for('product', part_number=values['part_no'])
+        path_with_prefix = f"/api/v1/product/{values['part_no']}"
         path = '/' + '/'.join(path_with_prefix.split('/')[3:])
         values['path'] = path
         return values
