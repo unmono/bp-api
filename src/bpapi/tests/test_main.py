@@ -1,5 +1,6 @@
 from datetime import timedelta
 from dataclasses import dataclass
+import json
 import pytest
 import sys
 sys.path.insert(0, './')
@@ -22,7 +23,6 @@ client = TestClient(app)
 class SetupUser:
     username: str
     password: str
-    # hashed_password: str
 
     @property
     def hashed_password(self) -> str:
@@ -34,7 +34,6 @@ def test_user(monkeypatch) -> SetupUser:
     test_user = SetupUser(
         username='user_hashed_password',
         password='hashed_test_password',
-        # hashed_password='$2b$12$dUkM5ijvyw6xs7iBRGxGy.5gaAE6HpT2tHLdKDmT1z5ABEjskPit6',
     )
     monkeypatch.setitem(
         dependencies.users,
@@ -208,3 +207,58 @@ def test_get_validation_errors(url, access_token):
         }
     )
     assert response.status_code == 422, url
+
+
+@pytest.mark.parametrize(
+    'search_query,results_exist',
+    [
+        ('0445115007', True),
+        ('F00VC17503', True),
+        ('F00VC175??', True),
+        ('?00VC175??', True),
+        ('??0VC175??', True),
+        ('DONTEXISTS', False),
+    ]
+)
+def test_search(search_query: str, results_exist: bool, access_token: str):
+    response = client.post(
+        '/api/v1/products/search/',
+        headers={
+            'accept': 'application/json',
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json'
+        },
+        json={
+            'search_query': search_query
+        }
+    )
+    search_results: list = response.json()
+    assert response.status_code == 200, response.json()
+    if results_exist:
+        assert len(search_results) > 0, f'{search_query} - {len(search_results)}'
+    else:
+        assert len(search_results) == 0
+
+
+@pytest.mark.parametrize(
+    'query_object',
+    [
+        {'search_query': '_445115007'},
+        {'search_query': '#445115007'},
+        {'search_query': '445115007'},
+        {'search_query': '00445115007'},
+        {'not_search_query': '0445115007'},
+        {},
+    ]
+)
+def test_search_validation_fails(query_object, access_token):
+    response = client.post(
+        '/api/v1/products/search/',
+        headers={
+            'accept': 'application/json',
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json'
+        },
+        json=query_object
+    )
+    assert response.status_code == 422, query_object
