@@ -20,6 +20,12 @@ pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 def get_user(username,
              stored_users: dict[str: dict] = users) -> schemas.UserValidation | None:
+    """
+
+    :param username:
+    :param stored_users:
+    :return:
+    """
     return schemas.UserValidation(**stored_users[username]) \
         if username in stored_users \
         else None
