@@ -1,20 +1,14 @@
 from __future__ import annotations
 import re
 from decimal import Decimal
-from typing import ClassVar, TypeAlias
 from pydantic import (
     BaseModel,
-    AnyUrl,
     validator,
     root_validator,
     constr,
     Field,
-    PrivateAttr,
-    ValidationError
 )
-from pydantic.dataclasses import dataclass
 
-# from main import app
 import settings
 settings = settings.ApiSettings()
 
@@ -74,7 +68,7 @@ class ListedPartnums(BaseModel):
     @root_validator
     def make_url(cls, values):
         # path_with_prefix = app.url_path_for('product', part_number=values['part_no'])
-        path_with_prefix = f"/api/v1/product/{values['part_no']}"
+        path_with_prefix = f"/api/v1/products/{values['part_no']}"
         path = '/' + '/'.join(path_with_prefix.split('/')[3:])
         values['path'] = path
         return values
@@ -147,11 +141,19 @@ class ValidationErrorSchema(BaseModel):
 
 
 class User(BaseModel):
-    username: str
+    username: constr(
+        strip_whitespace=True,
+        min_length=3,
+        max_length=25,
+        regex=r'^[a-zA-Z0-9 ]+$',
+    ) = Field(example='John Smith')
 
 
 class UserValidation(User):
-    hashed_password: str
+    password: constr(
+        min_length=8,
+        regex=r'^\S+$',
+    )
 
 
 class Token(BaseModel):

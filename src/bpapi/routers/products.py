@@ -2,7 +2,7 @@ import re
 from typing import Annotated
 from collections import defaultdict
 
-from fastapi import Depends, APIRouter, Path
+from fastapi import Depends, APIRouter, Path, Security
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session

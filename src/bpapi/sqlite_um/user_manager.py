@@ -24,7 +24,7 @@ class SQLiteUserManager:
 
     def __init__(
         self,
-        database_path: str | bytes | os.PathLike,
+        database_path: str | bytes | os.PathLike = 'users.sqlite',
         table_name: str | None = 'users',
     ):
         # todo? kwargs user schema
@@ -40,18 +40,24 @@ class SQLiteUserManager:
         assert user_count in (0, 1), 'Whoa, something crazy with the database!'
         return bool(user_count)
 
+    def __getitem__(self, username: str):
+        if username not in self:
+            raise KeyError()
+        return self.get_user_dict(username)
+
     def add_user(
         self,
         username: str,
         password: str,
-        scopes: list[str],
+        scopes: list[str] = None,
     ) -> None:
         if username in self:
             raise UserAlreadyExists('This username is already used.')
+        scopes_str = ','.join(scopes) if scopes else ''
         data_to_insert = {
             'username': username,
             'password': password,
-            'scopes': ','.join(scopes)
+            'scopes': scopes_str
         }
         with self._db_connection() as db:
             with db:
@@ -82,6 +88,15 @@ class SQLiteUserManager:
             return user_dict
 
         raise UserDoesNotExist('User with this username doesn\'t exist.')
+
+    def get_all_users(self) -> list[dict[str, str]]:
+        with self._db_connection() as db:
+            fetch_users = db.execute(f"""
+                SELECT username 
+                FROM {self.table_name};
+            """).fetchall()
+
+        return [{'username': username} for username, in fetch_users]
 
     def _initial_setup(self) -> None:
         expected_table_structure = [

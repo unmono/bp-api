@@ -9,17 +9,24 @@ from fastapi.security import OAuth2PasswordBearer
 
 import schemas
 from users import users
+from sqlite_um.user_manager import SQLiteUserManager
 
 from settings import ApiSettings
 settings = ApiSettings()
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/login')
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl='/login',
+    # scopes={
+    #     'user_manager': "Add or delete users.",
+    #     'catalogue': "View catalogue."
+    # }
+)
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 
 def get_user(username,
-             stored_users: dict[str: dict] = users) -> schemas.UserValidation | None:
+             stored_users: dict[str: dict] | SQLiteUserManager = users) -> schemas.UserValidation | None:
     """
 
     :param username:
@@ -29,6 +36,10 @@ def get_user(username,
     return schemas.UserValidation(**stored_users[username]) \
         if username in stored_users \
         else None
+
+
+def hash_password(unhashed: str):
+    return pwd_context.hash(unhashed)
 
 
 def authenticate_user(username: str,
@@ -42,7 +53,7 @@ def authenticate_user(username: str,
     :return:
     """
     if (user := get_user(username, stored_users)) is not None:
-        if pwd_context.verify(password, user.hashed_password):
+        if pwd_context.verify(password, user.password):
             return user
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,

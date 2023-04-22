@@ -107,3 +107,24 @@ def test_get_not_existed_user_dict(setted_up_db):
     setted_up_db.add_user(**EXAMPLE_USER)
     with pytest.raises(UserDoesNotExist):
         user_dict = setted_up_db.get_user_dict('not_existed_username')
+
+
+def test_get_user_list(setted_up_db):
+    setted_up_db.add_user(**EXAMPLE_USER)
+    setted_up_db.add_user(**{
+        'username': 'example_user2',
+        'password': 'password',
+        'scopes': ['scope1', 'scope2']
+    })
+    setted_up_db.add_user(**{
+        'username': 'example_user3',
+        'password': 'password',
+        'scopes': ['scope1', 'scope2']
+    })
+    user_list = setted_up_db.get_all_users()
+    assert len(user_list) == 3
+    assert user_list == [
+        {'username': EXAMPLE_USER['username']},
+        {'username': 'example_user2'},
+        {'username': 'example_user3'},
+    ]

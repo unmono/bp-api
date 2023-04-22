@@ -5,7 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 
 import schemas
-from routers import products, login
+from routers import products, login, users_manager
 
 from settings import ApiSettings
 settings = ApiSettings()
@@ -22,6 +22,7 @@ app.add_middleware(
 
 app.include_router(products.router)
 app.include_router(login.router)
+app.include_router(users_manager.router)
 
 
 @app.exception_handler(RequestValidationError)
@@ -34,3 +35,10 @@ async def validation_exception(request, exc: RequestValidationError) -> JSONResp
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content=jsonable_encoder({'detail': error_messages})
     )
+
+# todo :
+#   - users managing
+#   - testing search post
+#   - containerize
+#   - frontend cache
+#   - containerize frontend
