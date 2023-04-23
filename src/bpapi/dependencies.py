@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 
 from fastapi import status, Depends
 from fastapi.exceptions import HTTPException
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 
 import schemas
 from users import users
@@ -17,10 +17,10 @@ settings = ApiSettings()
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl='/login',
-    # scopes={
-    #     'user_manager': "Add or delete users.",
-    #     'catalogue': "View catalogue."
-    # }
+    scopes={
+        'user_manager': "Add or delete users.",
+        'catalogue': "View catalogue."
+    }
 )
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
@@ -74,24 +74,45 @@ def create_token(user_data: dict, expires_delta: timedelta = timedelta(hours=1))
     return jwt.encode(data_to_encode, settings.AUTH_KEY, algorithm=settings.AUTH_ALG)
 
 
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> schemas.User:
+def get_current_user(security_scopes: SecurityScopes,
+                     token: Annotated[str, Depends(oauth2_scheme)]) -> schemas.User:
+    authenticate_value = f'Bearer scope="{security_scopes.scope_str}"'\
+        if security_scopes.scopes\
+        else 'Bearer'
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='Invalid credentials',
-        headers={'WWW-Authenticate': 'Bearer'}
+        headers={'WWW-Authenticate': authenticate_value}
     )
     try:
         payload = jwt.decode(token, settings.AUTH_KEY, algorithms=[settings.AUTH_ALG, ])
         if (username := payload.get('sub')) is None:
             raise credentials_exception
-        if (user := get_user(username)) is None:
-            raise credentials_exception
+        token_scopes = payload.get('scopes', [])
     except ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Credentials expired',
-            headers={'WWW-Authenticate': 'Bearer'}
+            headers={'WWW-Authenticate': authenticate_value}
         )
     except JWTError:
         raise credentials_exception
+
+    token_data = schemas.TokenData(
+        username=username,
+        scopes=token_scopes,
+    )
+
+    if (user := get_user(token_data.username)) is None:
+        raise credentials_exception
+
+    for scope in security_scopes.scopes:
+        if scope not in token_data.scopes:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='Not enough permissions',
+                headers={'WWW-Authenticate': authenticate_value}
+            )
+
     return schemas.User(username=user.username)

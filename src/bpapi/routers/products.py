@@ -20,7 +20,9 @@ LoggedUserDependency = Annotated[schemas.User, Depends(dependencies.get_current_
 
 router = APIRouter(
     tags=['Catalogue'],
-    dependencies=[Depends(dependencies.get_current_user)],
+    dependencies=[
+        Security(dependencies.get_current_user, scopes=['catalogue'])
+    ],
     prefix=settings.ROUTE_PREFIX
 )
 

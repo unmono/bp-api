@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Security
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
 
@@ -15,7 +15,7 @@ settings = ApiSettings()
 router = APIRouter(
     tags=['UM'],
     dependencies=[
-        Depends(dependencies.get_current_user),
+        Security(dependencies.get_current_user, scopes=['user_manager']),
     ],
     prefix=settings.ROUTE_PREFIX + '/users',
 )
