@@ -1,11 +1,9 @@
-from typing import Annotated
-
 from fastapi import APIRouter, Depends, Security
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
 
 import dependencies
-import schemas
+from schemas import User, UserValidation, ValidationErrorSchema
 from sqlite_um.user_manager import SQLiteUserManager, UserAlreadyExists
 
 from settings import ApiSettings
@@ -22,19 +20,19 @@ router = APIRouter(
 
 
 def get_user_manager():
-    return SQLiteUserManager(database_path='users.sqlite')
+    return SQLiteUserManager(database_path=settings.USERS_DB_PATH)
 
 
-@router.get('/', response_model=list[schemas.User])
+@router.get('/', response_model=list[User])
 def get_user_list(um: SQLiteUserManager = Depends(get_user_manager)):
     return um.get_all_users()
 
 
-router.responses = {422: {'model': list[schemas.ValidationErrorSchema]}}
+router.responses = {422: {'model': list[ValidationErrorSchema]}}
 
 
-@router.post('/', response_model=list[schemas.User])
-def add_new_user(new_user: schemas.UserValidation,
+@router.post('/', response_model=list[User])
+def add_new_user(new_user: UserValidation,
                  um: SQLiteUserManager = Depends(get_user_manager)):
     new_user.password = dependencies.hash_password(new_user.password)
     try:
@@ -42,7 +40,7 @@ def add_new_user(new_user: schemas.UserValidation,
     except UserAlreadyExists as exc:
         raise HTTPException(
             status_code=422,
-            detail=[jsonable_encoder(schemas.ValidationErrorSchema(
+            detail=[jsonable_encoder(ValidationErrorSchema(
                 loc='username',
                 msg=str(exc)
             )), ]
@@ -51,10 +49,10 @@ def add_new_user(new_user: schemas.UserValidation,
         return um.get_all_users()
 
 
-@router.delete('/{username}', response_model=list[schemas.User])
+@router.delete('/{username}', response_model=list[User])
 def delete_user(username: str,
                 um: SQLiteUserManager = Depends(get_user_manager)):
-    poor_user = schemas.User(
+    poor_user = User(
         username=username
     )
     um.delete_user(poor_user.username)

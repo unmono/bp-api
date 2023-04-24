@@ -3,7 +3,7 @@ from pydantic import (
 )
 
 
-class ApiSettings(BaseSettings):
+class DevSettings(BaseSettings):
     # Routing
     ROUTE_PREFIX: str = '/api/v1'
 
@@ -13,14 +13,16 @@ class ApiSettings(BaseSettings):
     ]
     CORS_ALLOWED_METHODS: list[str] = [
         'GET',
-        'POST'
+        'POST',
+        'DELETE',
     ]
     CORS_ALLOWED_HEADERS: list[str] = [
         '*'
     ]
 
-    # Database:
-    DATABASE_URL: str = '../bp.sqlite'
+    # Databases:
+    DATABASE_PATH: str = '../bp.sqlite'
+    USERS_DB_PATH: str = 'users.sqlite'
 
     # Authentication
     AUTH_KEY: str
@@ -30,3 +32,11 @@ class ApiSettings(BaseSettings):
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'
+
+
+class ProdSettings(DevSettings):
+    pass
+
+
+class ApiSettings(DevSettings):
+    pass

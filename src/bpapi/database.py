@@ -5,7 +5,7 @@ from settings import ApiSettings
 settings = ApiSettings()
 
 
-DATABASE_URL = f"sqlite:///{settings.DATABASE_URL}"
+DATABASE_URL = f"sqlite:///{settings.DATABASE_PATH}"
 engine = create_engine(
     DATABASE_URL,
     connect_args={'check_same_thread': False},

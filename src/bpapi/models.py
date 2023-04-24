@@ -1,5 +1,3 @@
-from decimal import Decimal
-from typing import List
 from typing_extensions import Annotated
 from sqlalchemy import (
     ForeignKey,
@@ -87,20 +85,6 @@ class PartNumber(Base):
     refers: Mapped[list['PartNumber']] = relationship(secondary=partnumber_junction,
                                                       primaryjoin='PartNumber.id == refers.c.predecessor',
                                                       secondaryjoin='PartNumber.id == refers.c.successor',)
-    # refers: Mapped[list['PartnumReference']] = relationship(foreign_keys='PartnumReference.predecessor',
-    #                                                         lazy='joined')
-
-# class PartnumReference(Base):
-#     """
-#     Partnum self joining table.
-#     """
-#     __tablename__ = 'refers'
-#
-#     id: Mapped[rowid_pk]
-#     predecessor: Mapped[int] = mapped_column(ForeignKey('partnum.rowid'))
-#     successor: Mapped[int] = mapped_column(ForeignKey('partnum.rowid'))
-#     refer: Mapped['PartNumber'] = relationship(foreign_keys='PartnumReference.successor',
-#                                                lazy='joined')
 
 
 class Product(Base):

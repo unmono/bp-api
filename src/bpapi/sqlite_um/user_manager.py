@@ -20,6 +20,7 @@ class SQLiteUserManager:
     """
     Defines user management methods.
     Provides 'in' usage.
+    Provides object[username] getting.
     """
 
     def __init__(

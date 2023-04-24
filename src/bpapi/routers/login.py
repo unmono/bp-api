@@ -4,8 +4,8 @@ from datetime import timedelta
 from fastapi import Depends, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 
-import schemas
-import dependencies
+from schemas import Token
+from dependencies import authenticate_user, create_token
 
 from settings import ApiSettings
 settings = ApiSettings()
@@ -15,12 +15,12 @@ router = APIRouter(
 )
 
 
-@router.post('/login/', response_model=schemas.Token)
+@router.post('/login/', response_model=Token)
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    user = dependencies.authenticate_user(form_data.username, form_data.password)
+    user = authenticate_user(form_data.username, form_data.password)
     token_expire_delta = timedelta(hours=settings.TOKEN_EXPIRE_HOURS)
-    token = dependencies.create_token(
+    token = create_token(
         user_data={'sub': user.username, 'scopes': user.scopes},
         expires_delta=token_expire_delta,
     )
-    return schemas.Token(access_token=token, token_type='bearer')
+    return Token(access_token=token, token_type='bearer')

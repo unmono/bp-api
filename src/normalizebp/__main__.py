@@ -41,4 +41,3 @@ if __name__ == '__main__':
     file_to_normalize = dealing_with_files()
     normalization_script = get_script()
     run_normalization(file_to_normalize, normalization_script)
-

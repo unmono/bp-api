@@ -18,14 +18,6 @@ class Group(BaseModel):
     title: str
     path: str | None
 
-    @root_validator
-    def make_url(cls, values):
-        # path_with_prefix = app.url_path_for('products_by_group', group_id=values['id'])
-        path_with_prefix = f"/api/v1/sections/{values['id']}"
-        path = '/' + '/'.join(path_with_prefix.split('/')[3:])
-        values['path'] = path
-        return values
-
     class Config:
         orm_mode = True
         schema_extra = {
@@ -39,7 +31,7 @@ class Group(BaseModel):
 class Section(BaseModel):
 
     title: str
-    subsections: list[Section | Group]
+    subsections: list[Section | Group]  # future annotation
 
     class Config:
         schema_extra = {
@@ -60,17 +52,18 @@ class Section(BaseModel):
         }
 
 
+part_no_field = Field(example='AZ0910CHAR')
+title_en_field = Field(example='Product english description. \'None\' in case of refers list')
+
+
 class ListedPartnums(BaseModel):
-    part_no: str = Field(example='AZ0910CHAR')
-    title_en: str | None = Field(example='Product english description. \'None\' in case of refers list')
+    part_no: str = part_no_field
+    title_en: str | None = title_en_field
     path: str | None = Field(example='/path_to_detail/without/api/version')
 
     @root_validator
     def make_url(cls, values):
-        # path_with_prefix = app.url_path_for('product', part_number=values['part_no'])
-        path_with_prefix = f"/api/v1/products/{values['part_no']}"
-        path = '/' + '/'.join(path_with_prefix.split('/')[3:])
-        values['path'] = path
+        values['path'] = f"/products/{values['part_no']}"
         return values
 
     class Config:
@@ -78,8 +71,8 @@ class ListedPartnums(BaseModel):
 
 
 class Product(BaseModel):
-    title_ua: str
-    title_en: str
+    title_ua: str = Field(example='Product ukrainian description')
+    title_en: str = title_en_field
     uktzed: int
     min_order: int
     quantity: int
@@ -108,7 +101,7 @@ class MasterData(BaseModel):
 
 
 class PartNumber(BaseModel):
-    part_no: str
+    part_no: str = part_no_field
     discontinued: bool
     new_release: bool
     product: Product | None
@@ -152,6 +145,7 @@ class User(BaseModel):
 class UserValidation(User):
     password: constr(
         min_length=8,
+        max_length=25,
         regex=r'^\S+$',
     )
     scopes: list[str] = ['catalogue', ]

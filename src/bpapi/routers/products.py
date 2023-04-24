@@ -1,5 +1,4 @@
 import re
-from typing import Annotated
 from collections import defaultdict
 
 from fastapi import Depends, APIRouter, Path, Security
@@ -15,9 +14,6 @@ import dependencies
 from settings import ApiSettings
 settings = ApiSettings()
 
-
-LoggedUserDependency = Annotated[schemas.User, Depends(dependencies.get_current_user)]
-
 router = APIRouter(
     tags=['Catalogue'],
     dependencies=[
@@ -28,8 +24,7 @@ router = APIRouter(
 
 
 @router.get('/sections/', response_model=list[schemas.Section])
-async def sections(user: LoggedUserDependency,
-                   db: Session = Depends(database.db_session)):
+async def sections(db: Session = Depends(database.db_session)):
     """
     Complete list of sections, subsections and group in current Bosch price.
     """
@@ -41,13 +36,16 @@ async def sections(user: LoggedUserDependency,
     dict_of_sections = defaultdict(lambda: defaultdict(list))
 
     for pk, title, subsection, section in fetched_list_of_groups:
+        # Group kwargs for schemas.Group
         group = {
             'id': pk,
             'title': title,
+            'path': '/' + router.url_path_for('products_by_group', group_id=pk).lstrip(settings.ROUTE_PREFIX)
         }
         dict_of_sections[section][subsection].append(group)
 
-    # If models are defined, the instances are created twice as well as validation's run.
+    # Structure corresponding to response models
+    # If models are defined here, the instances are created twice as well as validation runs.
     return [{'title': section, 'subsections': [
         {'title': subsection, 'subsections': groups_list}
         for subsection, groups_list in subsection_dict.items()
@@ -59,8 +57,7 @@ router.responses = {422: {'model': list[schemas.ValidationErrorSchema]}}
 
 
 @router.get('/sections/{group_id}/')
-async def products_by_group(user: LoggedUserDependency,
-                            group_id: int = Path(title='The ID of group of products.', ge=1),
+async def products_by_group(group_id: int = Path(title='The ID of group of products.', ge=1),
                             db: Session = Depends(database.db_session)) -> list[schemas.ListedPartnums]:
     """
     List of products in selected calatogue group.
@@ -71,8 +68,7 @@ async def products_by_group(user: LoggedUserDependency,
 
 
 @router.get('/products/{part_number}/', response_model=schemas.PartNumber)
-async def product(user: LoggedUserDependency,
-                  part_number: str, db: Session = Depends(database.db_session)):
+async def product(part_number: str, db: Session = Depends(database.db_session)):
     """
     Detail catalogue info for the requested product.
     """
@@ -92,8 +88,7 @@ async def product(user: LoggedUserDependency,
 
 
 @router.post('/products/search/', response_model=list[schemas.ListedPartnums])
-async def search(user: LoggedUserDependency,
-                 search_request: schemas.SearchRequest,
+async def search(search_request: schemas.SearchRequest,
                  db: Session = Depends(database.db_session)):
     """
     Search for specific part number in Bosch catalogue.

@@ -18,8 +18,8 @@ settings = ApiSettings()
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl='/login',
     scopes={
-        'user_manager': "Add or delete users.",
-        'catalogue': "View catalogue."
+        'user_manager': "Add or delete users",
+        'catalogue': "View catalogue"
     }
 )
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
