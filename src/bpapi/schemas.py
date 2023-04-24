@@ -145,8 +145,8 @@ class User(BaseModel):
         strip_whitespace=True,
         min_length=3,
         max_length=25,
-        regex=r'^[a-zA-Z0-9 ]+$',
-    ) = Field(example='John Smith')
+        regex=r'^[a-zA-Z0-9]+$',
+    ) = Field(example='JohnSmith')
 
 
 class UserValidation(User):
@@ -154,6 +154,7 @@ class UserValidation(User):
         min_length=8,
         regex=r'^\S+$',
     )
+    scopes: list[str] = ['catalogue', ]
 
 
 class Token(BaseModel):

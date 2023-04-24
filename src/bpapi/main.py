@@ -35,10 +35,3 @@ async def validation_exception(request, exc: RequestValidationError) -> JSONResp
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content=jsonable_encoder({'detail': error_messages})
     )
-
-# todo :
-#   - users managing
-#   - testing search post
-#   - containerize
-#   - frontend cache
-#   - containerize frontend
