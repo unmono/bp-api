@@ -145,7 +145,6 @@ class User(BaseModel):
 class UserValidation(User):
     password: constr(
         min_length=8,
-        max_length=25,
         regex=r'^\S+$',
     )
     scopes: list[str] = ['catalogue', ]

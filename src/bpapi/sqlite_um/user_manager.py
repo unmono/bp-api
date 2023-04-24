@@ -21,6 +21,9 @@ class SQLiteUserManager:
     Defines user management methods.
     Provides 'in' usage.
     Provides object[username] getting.
+    Superuser should be created on initial setup.
+    Superuser cannot be deleted through api.
+    Superuser cannot be listed through api.
     """
 
     def __init__(
@@ -51,20 +54,30 @@ class SQLiteUserManager:
         username: str,
         password: str,
         scopes: list[str] = None,
+        su: bool = False,
     ) -> None:
+        """
+        Add new user.
+        :param username: username
+        :param password: plain password
+        :param scopes: list of scope strings.
+        :param su: add superuser. Should not be available through api.
+        :return: None
+        """
         if username in self:
             raise UserAlreadyExists('This username is already used.')
         scopes_str = ','.join(scopes) if scopes else ''
         data_to_insert = {
             'username': username,
             'password': password,
-            'scopes': scopes_str
+            'scopes': scopes_str,
+            'su': su,
         }
         with self._db_connection() as db:
             with db:
                 db.execute(f"""
                     INSERT INTO {self.table_name} 
-                    VALUES (:username, :password, :scopes);
+                    VALUES (:username, :password, :scopes, :su);
                 """, data_to_insert)
 
     def delete_user(self, username: str) -> None:
@@ -72,7 +85,7 @@ class SQLiteUserManager:
             with db:
                 db.execute(f"""
                     DELETE FROM {self.table_name}
-                    WHERE username = ?;
+                    WHERE username = ? AND su != 1;
                 """, (username, ))
 
     def get_user_dict(self, username: str) -> dict[str, str | list[str]] | None:
@@ -80,7 +93,7 @@ class SQLiteUserManager:
             values = db.execute(f"""
                 SELECT username, password, scopes
                 FROM {self.table_name}
-                WHERE username = ?
+                WHERE username = ?;
             """, (username, )).fetchone()
         if values:
             keys = ('username', 'password', 'scopes')
@@ -94,7 +107,8 @@ class SQLiteUserManager:
         with self._db_connection() as db:
             fetch_users = db.execute(f"""
                 SELECT username 
-                FROM {self.table_name};
+                FROM {self.table_name}
+                WHERE su != 1;
             """).fetchall()
 
         return [{'username': username} for username, in fetch_users]
@@ -104,6 +118,7 @@ class SQLiteUserManager:
             ('username', 'TEXT'),
             ('password', 'TEXT'),
             ('scopes', 'TEXT'),
+            ('su', 'INT'),  # superuser True/False
         ]
         with self._db_connection() as db:
             db.execute(f"""
