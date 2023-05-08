@@ -138,7 +138,7 @@ class User(BaseModel):
         strip_whitespace=True,
         min_length=3,
         max_length=25,
-        regex=r'^[a-zA-Z0-9]+$',
+        regex=r'^[a-zA-Z0-9_]+$',
     ) = Field(example='JohnSmith')
 
 
