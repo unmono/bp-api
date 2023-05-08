@@ -3,6 +3,8 @@ import os
 import sqlite3
 from typing import Generator
 
+from sqlite_um.logger import logger
+
 
 class UserAlreadyExists(Exception):
     pass
@@ -31,7 +33,7 @@ class SQLiteUserManager:
         database_path: str | bytes | os.PathLike = 'users.sqlite',
         table_name: str | None = 'users',
     ):
-        # todo? kwargs user schema
+        # todo? kwargs - user schema
         self.database_path = database_path
         self.table_name = table_name
 
@@ -80,6 +82,10 @@ class SQLiteUserManager:
                     VALUES (:username, :password, :scopes, :su);
                 """, data_to_insert)
 
+        assert username in self, 'The user was NOT created'
+        spr = 'super' if su else ''
+        logger.info(f'The {spr}user \'{username}\' has been created.')
+
     def delete_user(self, username: str) -> None:
         with self._db_connection() as db:
             with db:
@@ -87,6 +93,8 @@ class SQLiteUserManager:
                     DELETE FROM {self.table_name}
                     WHERE username = ? AND su != 1;
                 """, (username, ))
+        assert username not in self, 'The has-been-deleted user is still in db'
+        logger.info(f'The user \'{username}\' has been deleted')
 
     def get_user_dict(self, username: str) -> dict[str, str | list[str]] | None:
         with self._db_connection() as db:
@@ -134,6 +142,7 @@ class SQLiteUserManager:
             """, (self.table_name, )).fetchall()
 
             assert results == expected_table_structure, 'Table structure is not supported.'
+        logger.info('User database is set up')
 
     @contextlib.contextmanager
     def _db_connection(self) -> Generator[sqlite3.Connection, None, None]:

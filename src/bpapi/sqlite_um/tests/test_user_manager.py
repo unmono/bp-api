@@ -10,12 +10,12 @@ EXAMPLE_USER = {
     'scopes': ['scope1', 'scope2']
 }
 
-
 SUPPORTED_TABLE_SCHEMAS = [
     {
         'username': 'TEXT',
         'password': 'TEXT',
         'scopes': 'TEXT',
+        'su': 'INT',
     },
     {},
 ]
@@ -23,6 +23,7 @@ SUPPORTED_TABLE_SCHEMAS = [
 UNSUPPORTED_TABLE_SCHEMAS = [
     {
         'username': 'TEXT',
+        'password': 'TEXT',
         'scopes': 'TEXT',
     },
     {
