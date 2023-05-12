@@ -15,7 +15,7 @@ router = APIRouter(
 )
 
 
-@router.post('/login/', response_model=Token)
+@router.post('/api/v1/login/', response_model=Token)
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     user = authenticate_user(form_data.username, form_data.password)
     token_expire_delta = timedelta(hours=settings.TOKEN_EXPIRE_HOURS)

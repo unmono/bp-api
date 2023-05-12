@@ -10,3 +10,6 @@ export const SearchContext =
 
 export const ModalContext =
   createContext<[ProductShortType] | null>(null);
+
+export const LoginContext =
+  createContext<string>('');

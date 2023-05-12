@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { useParams, Link, useLoaderData } from 'react-router-dom';
+import { useParams, Link, useLoaderData, json } from 'react-router-dom';
 
 import {
   MasterDataType,
@@ -7,11 +7,29 @@ import {
   ProductShortType,
   ProductType
 } from "../types";
-import {SubsectionModalContext} from '../contexts';
+import {LoginContext, SubsectionModalContext} from '../contexts';
 import {bpGet} from "../api/axiosConfig";
+import {validatePartnum} from "../functions";
+import PartnumPlaceholder from "./PartnumPlaceholder";
 
 export default function ProductInfo () {
-  const part = useLoaderData() as PartType;
+  // const part = useLoaderData() as PartType;
+  const tkn = useContext(LoginContext);
+  const [part, setPart] = useState<PartType | null>(null);
+  const {partNum} = useParams();
+
+  useEffect(() => {
+     if(partNum && validatePartnum(partNum)) {
+       bpGet(`/products/${partNum}`, tkn)
+         .then(response => {setPart(response);})
+         .catch((error) => {
+           throw json({
+             code: 404,
+             message: 'No such product, bitch.'
+           })
+         })
+     }
+  }, [partNum]);
 
   const boschThisNumber = (v: string) =>
     `${v.slice(0, 1)} ${v.slice(1, 4)} ${v.slice(4, 7)} ${v.slice(7, 10)}`;
