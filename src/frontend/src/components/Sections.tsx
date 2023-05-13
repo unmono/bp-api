@@ -8,17 +8,7 @@ import {bpGet} from "../api/axiosConfig";
 import {LoginContext} from "../contexts";
 
 export default function () {
-  // const sections = useLoaderData() as [SectionType];
-  const tkn = useContext(LoginContext);
-  const [sections, setSections] = useState<[SectionType] | null>(null);
-
-  useEffect(() => {
-    bpGet('/sections/', tkn).then(response => {
-      setSections(response);
-    }).catch(error => {
-      console.log(error);
-    })
-  }, []);
+  const sections = useLoaderData() as [SectionType];
 
   const renderSub = (s: SectionType) => {
     const subsections = s.subsections.map(

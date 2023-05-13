@@ -1,19 +1,31 @@
 import React, { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import PartnumPlaceholder from "./PartnumPlaceholder";
+import { login } from "../api/axiosConfig";
 
 type LoginFormProps = {
   onLogin: (login: string, password: string) => void;
 };
 
 const LoginForm: React.FC = () => {
-  const [login, setLogin] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { onLogin } = useOutletContext<LoginFormProps>();
 
-  const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onLogin(login, password);
+    const token = await login(username, password);
+    const cookie_props = {
+      path: '/',
+      maxAge: 60,
+      sameSite: 'strict',
+      // httpOnly: true,
+      // secure: true,
+    }
+
+    document.cookie = `access_token=${token};` +
+      Object.entries(cookie_props)
+        .map(([key, value]) => `${key}=${value}`)
+        .join('; ');
   };
 
   return (
@@ -25,8 +37,8 @@ const LoginForm: React.FC = () => {
           <input
             type="text"
             id="login-input"
-            value={login}
-            onChange={(event) => setLogin(event.target.value)}
+            value={ username }
+            onChange={(event) => setUsername(event.target.value)}
           />
         </div>
         <div>

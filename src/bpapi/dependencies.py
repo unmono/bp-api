@@ -6,6 +6,7 @@ from passlib.context import CryptContext
 from fastapi import status, Depends
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
+from starlette.requests import Request
 
 import schemas
 from users import users
@@ -15,13 +16,29 @@ from settings import ApiSettings
 settings = ApiSettings()
 
 
-oauth2_scheme = OAuth2PasswordBearer(
+class CookieOAuth2(OAuth2PasswordBearer):
+    async def __call__(self, request: Request) -> str | None:
+        cookie_token = request.cookies.get('access_token')
+        header_token = request.headers.get('Authorization')
+        if header_token:
+            return await super().__call__(request)
+        if cookie_token:
+            return cookie_token
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+oauth2_scheme = CookieOAuth2(
     tokenUrl='/login',
     scopes={
         'user_manager': "Add or delete users",
         'catalogue': "View catalogue"
-    }
+    },
 )
+
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 

@@ -6,18 +6,13 @@ export const api = axios.create({
 });
 
 export const bpGet = async (
-  endpoint: string,
-  accessToken: string
+  endpoint: string
 ) => {
   let resp: AxiosResponse<any, any> | null = null;
   try {
     resp = await api.get(
       endpoint,
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      }
+      { withCredentials: true }
     );
   } catch(error: any) {
     if(error.response) {
@@ -36,7 +31,6 @@ export const bpGet = async (
 
 export const searchPost = async (
   data: { search_query: string },
-  accessToken: string,
   endpoint: string = '/products/search/'
 ) => {
   let resp: AxiosResponse<any, any> | null = null;
@@ -44,11 +38,7 @@ export const searchPost = async (
     resp = await api.post(
       endpoint,
       data,
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      }
+      { withCredentials: true }
     );
   } catch(error) {
     console.log(error);

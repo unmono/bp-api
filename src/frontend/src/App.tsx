@@ -18,13 +18,12 @@ import {
 
 
 function App() {
-  const [tkn, setTkn] = useState<string>('');
   const [modalProductsList, setProductsList] = useState<[ProductShortType] | null>(null);
   const navigate = useNavigate();
 
   const listSubsectionInModal = (subUrl?: string) => () => {
     if(subUrl){
-      bpGet(subUrl, tkn).then(response => {
+      bpGet(subUrl).then(response => {
         setProductsList(response);
       });
     } else {
@@ -33,7 +32,7 @@ function App() {
   }
 
   const listSearchResultsInModal = (searchQuery: SearchQuery) => {
-    searchPost(searchQuery, tkn).then(response => {
+    searchPost(searchQuery).then(response => {
       if(response.length === 1) {
         navigate(`/products/${response[0].part_no}`);
         return;
@@ -42,25 +41,18 @@ function App() {
     })
   }
 
-  const onLogin = async (username: string, password: string) => {
-    const token = await login(username, password);
-    setTkn(token);
-  }
-
   return (
-    <LoginContext.Provider value={ tkn }>
     <SubsectionModalContext.Provider value={ listSubsectionInModal }>
     <SearchContext.Provider value={ listSearchResultsInModal }>
     <ModalContext.Provider value={modalProductsList} >
       <div className={'layout'}>
         <NavBar />
-        <Outlet context={{onLogin}}/>
+        <Outlet />
         {modalProductsList && <Modal/>}
       </div>
     </ModalContext.Provider>
     </SearchContext.Provider>
     </SubsectionModalContext.Provider>
-    </LoginContext.Provider>
   )
 }
 

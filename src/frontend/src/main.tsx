@@ -24,26 +24,26 @@ const routes = (
   >
     <Route
       index
-      // loader={
-      //   async _ => await bpGet('/sections')
-      // }
+      loader={
+        async _ => await bpGet('/sections')
+      }
       element={<Sections />}
       errorElement={<ErrorComponent />}
     />
     <Route
       path={'/products/:partNum'}
-      // loader={
-      //   async ({params}) => {
-      //     if(params.partNum && validatePartnum(params.partNum)) {
-      //       return await bpGet(`/products/${params.partNum}`)
-      //     } else {
-      //       throw json({
-      //         code: 404,
-      //         message: 'No such product, bitch.'
-      //       });
-      //     }
-      //   }
-      // }
+      loader={
+        async ({params}) => {
+          if(params.partNum && validatePartnum(params.partNum)) {
+            return await bpGet(`/products/${params.partNum}`)
+          } else {
+            throw json({
+              code: 404,
+              message: 'No such product, bitch.'
+            });
+          }
+        }
+      }
       element={<ProductInfo />}
       errorElement={<ErrorComponent />}
     />
