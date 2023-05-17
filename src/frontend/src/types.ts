@@ -3,20 +3,6 @@ export interface SubSubSectionType {
   path: string;
 }
 
-export interface SubSectionType {
-  title: string;
-  subsections: [SubSubSectionType];
-}
-
-export interface SectionType {
-  title: string;
-  subsections: [SubSectionType];
-}
-
-export interface SearchQuery {
-  search_query: string;
-}
-
 export interface ProductShortType {
   part_no: string;
   title_en: string;

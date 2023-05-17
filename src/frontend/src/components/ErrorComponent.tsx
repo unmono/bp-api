@@ -8,7 +8,6 @@ export default function ErrorComponent() {
 
   return (
     <>
-      <PartnumPlaceholder />
       <div className={'error-block'}>
         { data.code && <h1>{ data.code }</h1> }
         <h3>{ data.message }</h3>

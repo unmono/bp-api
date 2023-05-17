@@ -1,37 +1,23 @@
-import { useState, useEffect, useContext } from 'react';
 import { useLoaderData } from 'react-router-dom';
 
-import {SectionType} from "../types";
+import {SectionType} from "./Section";
 import SubSection from "./SubSection";
-import PartnumPlaceholder from "./PartnumPlaceholder";
-import {bpGet} from "../api/axiosConfig";
-import {LoginContext} from "../contexts";
+import Section from "./Section";
 
 export default function () {
   const sections = useLoaderData() as [SectionType];
 
-  const renderSub = (s: SectionType) => {
-    const subsections = s.subsections.map(
-      sub => <SubSection {...sub} key={`sub${sub.title}`} />
-    );
-    return (
-      <li key={s.title}>
-        <div>{ s.title }</div>
-        <ul>{ subsections }</ul>
-      </li>
-    )
-  }
+  // const sectionBlocks = sections
+  //   ? sections.map(renderSub)
+  //   : undefined;
 
-  const sectionBlocks = sections
-    ? sections.map(renderSub)
-    : undefined;
+  const sectionsList = sections
+    ? sections.map(s => <Section section={s} />)
+    : undefined
 
   return (
-    <>
-      <PartnumPlaceholder />
-      <ul className={'sections'}>
-        {sectionBlocks}
-      </ul>
-    </>
+    <ul className={'sections'}>
+      {sectionsList}
+    </ul>
   );
 }

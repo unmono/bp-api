@@ -5,164 +5,163 @@
 
 html, body {
   max-width: 900px;
-  min-width: 650px;
+  min-width: 470px;
   margin: auto;
   padding: 10px;
   font-family: Sans-Serif;
+  background-color: #212222;
 }
 
 ul {
   list-style: none;
+  margin: 0;
 }
 
-a {
+nav {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+nav > div {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links {
   color: #226798;
+  background: #212222;
+  outline: 0;
+  border: 0;
+  font-size: 24px;
   text-decoration: none;
+  font-weight: lighter;
   cursor: pointer;
 }
-a:hover {
+.nav-links:active {
+  color: #212222;
+  background: #226798;
+}
+
+.nav-links-active {
+  color: #212222;
+  background: #226798;
+}
+
+.search-submit {
+  color: #269d26;
+  background: #212222;
+  outline: 0;
+  border: 0;
+  font-size: 24px;
+  text-decoration: none;
+  font-weight: lighter;
+  cursor: pointer;
+}
+.search-submit:active {
+  color: #212222;
+  background: #269d26;
+}
+
+.search-input {
+  outline: none;
+  border: 0;
+  background: #414444;
+  color: white;
+  font-size: 24px;
+  font-weight: lighter;
+  font-family: Sans-Serif;
+}
+
+.content {
+  margin: 30px 0;
+}
+
+.simple-link {
+  color: #226798;
+  text-decoration: none;
+}
+.simple-link:hover {
   text-decoration: underline;
 }
 
-.layout {
+.loginForm {
   display: flex;
-  flex-flow: row wrap;
-  justify-content: space-evenly;
-  align-items: flex-start;
-  gap: 20px;
+  flex-direction: column;
+  gap: 10px;
+  width: fit-content;
 }
-nav {
-  flex-grow: 2;
+.loginForm > div {
   display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 60px;
+  justify-content: space-between;
 }
-
-.search input, .search button {
-  font-size: 24px;
-  border-color: gray;
-}
-.search input {
-  outline: none;
-  border-width: 0 0 1px 0;
-  color: #404040;
-  height: 40px;
-}
-.search button {
-  width: 70px;
-  height: 41px;
+.loginForm label {
+  color: #c05dd7;
+  font-family: Sans-Serif;
   font-weight: lighter;
-  color: white;
-  border: 0;
-  background: steelblue;
-  border-radius: 0 6px 6px 0;
+  font-size: 20px;
+  margin-right: 5px;
 }
-.search button:active {
-  background-color: #0e69a9;
+.loginForm input {
+  outline: none;
+  border: 0;
+  background: #414444;
+  color: white;
+  font-size: 20px;
+  font-weight: lighter;
+  font-family: Sans-Serif;
+}
+.loginForm button {
+  color: #269d26;
+  background: #212222;
+  outline: 0;
+  border: 0;
+  font-size: 20px;
+  text-decoration: none;
+  font-weight: lighter;
+  cursor: pointer;
+  width: available;
+}
+.loginForm button:active {
+  color: #212222;
+  background: #269d26;
 }
 
 .sections {
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 40px 20px;
-  line-height: 1.3rem;
-  color: #404040;
-}
-.sections > li {
-  min-width: 370px;
-}
-.sections > li > div {
-  border-bottom: 1px solid gray;
-}
-.sections div {
-  margin-top: 10px;
-}
-.sections ul {
-  padding-left: 20px;
-}
-
-.section-button {
-  display: flex;
-  flex-direction: column;
-  width: 60px;
-  cursor: pointer;
-}
-.section-button span {
-  background: #404040;
-  border-radius: 4px;
-  height: 5px;
-  margin: 4px 0;
-  transition: 0.4s;
-}
-.section-button span:nth-of-type(1) {
-  width: 50%;
-}
-.section-button span:nth-of-type(2) {
-  width: 100%;
-}
-.section-button span:nth-of-type(3) {
-  width: 75%;
-}
-
-.section-button-active span {
-  background: steelblue;
-}
-
-.partnum-placeholder {
-  color: gray;
-  font-size: 20px;
+  color: #bbbbbb;
+  font-size: 18px;
   font-weight: lighter;
-  line-height: 1.3em;
-}
-
-.product-list-modal {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.4);
-}
-
-.modal-content {
-  background-color: white;
-  margin: 5% auto;
-  width: 70%;
-  max-width: 1200px;
-  border-radius: 10px;
-}
-
-.modal-top {
-  width: 100%;
-  padding: 10px 20px;
-  display: flex;
-  justify-content: flex-end;
-  font-size: 30px;
-}
-.modal-top span {
   cursor: pointer;
 }
 
-.product-list {
-  padding: 0 20px 20px 20px;
-  color: #404040;
+.search-results {
+  font-size: 18px;
+  font-weight: lighter;
 }
-.product-list > ul {
-  columns: 2;
-  margin: auto;
+
+.search-list-header {
+  color: #bbbbbb;
 }
-.product-list > ul li {
-  line-height: 1.4rem;
+
+.part-block {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.refers-block > div {
+  color: #bbbbbb;
+  font-size: 30px;
+  font-weight: lighter;
 }
 
 .part-number {
   font-size: 30px;
   font-weight: lighter;
-  color: #404040;
+  color: #bbbbbb;
 }
 
 .product-status, .discontinued, .new-release {
@@ -178,8 +177,39 @@ nav {
   color: brown;
 }
 
+.part-data {
+  margin-top: 10px;
+  font-size: 18px;
+  color: #bbbbbb;
+}
+
+.part-data-header {
+  font-weight: lighter;
+}
+
+.part-data-list {
+  font-weight: lighter;
+}
+.part-data-list > li {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 15px;
+  align-items: center;
+}
+.part-data-list > li > div:first-child {
+  width: 120px;
+  text-align: right;
+}
+.part-data-list > li > div:not(:first-child) {
+  font-family: monospace;
+}
+
+.price-color {
+  color: #cb8f0d !important;
+}
+
 .product-info {
-  min-width: 650px;
+  min-width: 470px;
   flex-grow: 3;
   display: flex;
   flex-flow: row wrap;
@@ -187,7 +217,7 @@ nav {
   gap: 20px;
 }
 .product-info-table {
-  color: #404040;
+  color: #bbbbbb;
   min-width: 650px;
   max-width: 690px;
 }
@@ -209,7 +239,7 @@ nav {
 .refers > div {
   min-width: 145px;
   height: 24px;
-  color: #404040;
+  color: #bbbbbb;
   font-weight: bold;
   border-bottom: 1px solid gray;
 }
@@ -224,22 +254,15 @@ nav {
   color: gray;
 }
 
-.error-block {
-  padding-top: 40px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
 .error-block > * {
   margin: 0;
-  text-align: center;
+  font-weight: lighter;
 }
 .error-block h1 {
   color: brown;
 }
 .error-block h3 {
-  font-weight: normal;
-  color: #404040;
+  color: #bbbbbb;
 }
 
 /*# sourceMappingURL=index.css.map */

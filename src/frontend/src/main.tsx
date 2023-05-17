@@ -16,6 +16,8 @@ import {validatePartnum} from "./functions";
 import ProductInfo from "./components/ProductInfo";
 import ErrorComponent from "./components/ErrorComponent";
 import LoginForm from "./components/LoginForm";
+import SearchResults from './components/SearchResults';
+import Part from "./components/Part";
 
 const routes = (
   <Route
@@ -44,7 +46,13 @@ const routes = (
           }
         }
       }
-      element={<ProductInfo />}
+      // element={<ProductInfo />}
+      element={<Part />}
+      errorElement={<ErrorComponent />}
+    />
+    <Route
+      path={'/products/search'}
+      element={<SearchResults />}
       errorElement={<ErrorComponent />}
     />
     <Route

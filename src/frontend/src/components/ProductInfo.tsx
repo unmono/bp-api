@@ -7,10 +7,7 @@ import {
   ProductShortType,
   ProductType
 } from "../types";
-import {LoginContext, SubsectionModalContext} from '../contexts';
-import {bpGet} from "../api/axiosConfig";
-import {validatePartnum} from "../functions";
-import PartnumPlaceholder from "./PartnumPlaceholder";
+import {SubsectionModalContext} from '../contexts';
 
 export default function ProductInfo () {
   const part = useLoaderData() as PartType;

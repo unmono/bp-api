@@ -1,58 +1,21 @@
-import React, { useState, createContext } from 'react';
+import React from 'react';
 import {
   Outlet,
-  useNavigate,
 } from 'react-router-dom';
 
-import { searchPost, bpGet, login } from './api/axiosConfig';
 import './index.css';
 import NavBar from "./components/Navbar";
-import Modal from "./components/Modal";
-import {ProductShortType, SearchQuery} from "./types";
-import {
-  SubsectionModalContext,
-  SearchContext,
-  ModalContext,
-  LoginContext,
-} from './contexts';
 
 
 function App() {
-  const [modalProductsList, setProductsList] = useState<[ProductShortType] | null>(null);
-  const navigate = useNavigate();
-
-  const listSubsectionInModal = (subUrl?: string) => () => {
-    if(subUrl){
-      bpGet(subUrl).then(response => {
-        setProductsList(response);
-      });
-    } else {
-      setProductsList(null);
-    }
-  }
-
-  const listSearchResultsInModal = (searchQuery: SearchQuery) => {
-    searchPost(searchQuery).then(response => {
-      if(response.length === 1) {
-        navigate(`/products/${response[0].part_no}`);
-        return;
-      }
-      setProductsList(response);
-    })
-  }
 
   return (
-    <SubsectionModalContext.Provider value={ listSubsectionInModal }>
-    <SearchContext.Provider value={ listSearchResultsInModal }>
-    <ModalContext.Provider value={modalProductsList} >
-      <div className={'layout'}>
-        <NavBar />
+    <>
+      <NavBar />
+      <div className={'content'}>
         <Outlet />
-        {modalProductsList && <Modal/>}
       </div>
-    </ModalContext.Provider>
-    </SearchContext.Provider>
-    </SubsectionModalContext.Provider>
+    </>
   )
 }
 

@@ -1,7 +1,17 @@
-$minWidth: 650px;
+$minWidth: 470px;
 $maxWidth: 900px;
 $mainPadding: 20px;
-$regularFontColor: #404040;
+
+$darkBG: #212222;
+$mainTextColor: #bbbbbb;
+$secondaryTextColor: #7e7e7e;
+$doButtonsColor: #269d26;
+$linksColor: #226798;
+$labelsTextColor: #c05dd7;
+
+$mainTextFont: Sans-Serif;
+
+$bodyTextSize: 18px;
 
 * {
   -moz-box-sizing: border-box;
@@ -14,195 +24,196 @@ html, body {
   margin: auto;
   padding: 10px;
 
-  font-family: Sans-Serif;
+  font-family: $mainTextFont;
+  background-color: $darkBG;
 }
 
 ul {
   list-style: none;
+  margin: 0;
 }
 
-a {
-  color: #226798;
+nav {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+
+  & > div {
+    display: flex;
+    gap: 20px;
+  }
+}
+
+// ==========================================
+// Buttons:
+// ==========================================
+$linksTextColor: $linksColor;
+$linksBackColor: $darkBG;
+$submitsColor: $doButtonsColor;
+$navLinksFontSize: 24px;
+
+@mixin links_colors($textColor, $backColor) {
+  color: $textColor;
+  background: $backColor;
+}
+@mixin links_base($textColor, $backColor, $textSize) {
+  @include links_colors($textColor, $backColor);
+
+  outline: 0;
+  border: 0;
+
+  font-size: $textSize;
   text-decoration: none;
+  font-weight: lighter;
   cursor: pointer;
+
+  &:active {
+    @include links_colors($backColor, $textColor);
+  }
+}
+
+.nav-links {
+  @include links_base(
+    $linksTextColor,
+    $linksBackColor,
+    $navLinksFontSize
+  );
+}
+.nav-links-active {
+  @include links_colors($linksBackColor, $linksTextColor);
+}
+
+.search-submit {
+  @include links_base(
+    $submitsColor,
+    $linksBackColor,
+    $navLinksFontSize
+  );
+}
+
+
+// ==========================================
+// Inputs:
+// ==========================================
+$inputsBGColor: #414444;
+
+@mixin text-input-base(
+  $textColor,
+  $backColor,
+  $textSize,
+  $textFont
+) {
+  outline: none;
+  border: 0;
+
+  background: $backColor;
+
+  color: $textColor;
+  font-size: $textSize;
+  font-weight: lighter;
+  font-family: $textFont;
+}
+
+.search-input {
+  @include text-input-base(
+    white,
+    $inputsBGColor,
+    $navLinksFontSize,
+    $mainTextFont
+  );
+}
+
+.content {
+  margin: 30px 0;
+}
+
+.simple-link {
+  color: $linksColor;
+  text-decoration: none;
 
   &:hover {
     text-decoration: underline;
   }
 }
 
-.layout {
+.loginForm {
   display: flex;
-  flex-flow: row wrap;
-  justify-content: space-evenly;
-  align-items: flex-start;
-  gap: 20px;
+  flex-direction: column;
+  gap: 10px;
+  width: fit-content;
 
-  & > * {
+  & > div {
+    display: flex;
+    justify-content: space-between;
   }
-}
 
-nav {
-  flex-grow: 2;
-
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 60px;
-}
-
-.search {
-  $inputHeight: 40px;
-
-  input, button {
-    font-size: 24px;
-    border-color: gray;
+  label {
+    color: $labelsTextColor;
+    font-family: $mainTextFont;
+    font-weight: lighter;
+    font-size: 20px;
+    margin-right: 5px;
   }
 
   input {
-    outline: none;
-    border-width: 0 0 1px 0;
-    color: $regularFontColor;
-    height: $inputHeight;
+    @include text-input-base(
+      white,
+      $inputsBGColor,
+      20px,
+      $mainTextFont
+    );
   }
 
   button {
-    width: 70px;
-    height: $inputHeight + 1;
-    font-weight: lighter;
-    color: white;
-    border: 0;
-    background: steelblue;
-    border-radius: 0 6px 6px 0;
-
-    &:active {
-      background-color: #0e69a9;
-    }
+    @include links-base(
+      $submitsColor,
+      $linksBackColor,
+      20px
+    );
+    width: available;
   }
 }
 
 .sections {
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 40px 20px;
 
-  line-height: 1.3rem;
-  color: $regularFontColor;
+  color: $mainTextColor;
 
-  & > li {
-    min-width: 370px;
-  }
-
-  & > li >div {
-    border-bottom: 1px solid gray;
-  }
-
-  div {
-    margin-top: 10px;
-  }
-
-  ul {
-    padding-left: 20px;
-  }
-}
-
-.section-button{
-  display: flex;
-  flex-direction: column;
-  width: 60px;
-  cursor: pointer;
-
-  span {
-    background: $regularFontColor;
-    border-radius: 4px;
-    height: 5px;
-    margin: 4px 0;
-    transition: .4s;
-  }
-  span:nth-of-type(1){
-    //height: 6px;
-    width: 50%;
-  }
-  span:nth-of-type(2){
-    //height: 4px;
-    width: 100%;
-    //margin-left: 4px;
-  }
-  span:nth-of-type(3){
-    //height: 4px;
-    width: 75%;
-    //margin-left: 4px;
-  }
-}
-
-.section-button-active {
-  span {
-    background: steelblue;
-  }
-}
-
-.partnum-placeholder {
-  color: gray;
-  font-size: 20px;
+  font-size: $bodyTextSize;
   font-weight: lighter;
-  line-height: 1.3em;
+  cursor: pointer;
 }
 
-.product-list-modal {
-  position: fixed;
-  left: 0;
-  top: 0;
-
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-
-  background-color: rgba(0,0,0,0.4);
+.search-results {
+  font-size: $bodyTextSize;
+  font-weight: lighter;
 }
-  .modal-content {
-    background-color: white;
-    margin: 5% auto;
-    width: 70%;
-    max-width: 1200px;
+.search-list-header {
+  color: $mainTextColor;
+}
 
-    border-radius: 10px;
-  }
-  .modal-top {
-    width: 100%;
+.part-block {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  gap: 30px;
+}
 
-    padding: 10px 20px;
-    display: flex;
-    justify-content: flex-end;
+.refers-block {
 
+  & > div {
+    color: $mainTextColor;
     font-size: 30px;
-
-    span {
-      cursor: pointer;
-    }
+    font-weight: lighter;
   }
-  .product-list {
-    padding: 0 20px 20px 20px;
-    color: $regularFontColor;
-
-    & > ul {
-      columns: 2;
-      margin: auto;
-
-      li {
-        line-height: 1.4rem;
-      }
-    }
-  }
-
-.part-number-block {
 }
 
 .part-number {
   font-size: 30px;
   font-weight: lighter;
-  color: $regularFontColor;
+  color: $mainTextColor;
 }
 
 .product-status {
@@ -218,6 +229,40 @@ nav {
   color: brown;
 }
 
+.part-data {
+  margin-top: 10px;
+
+  font-size: $bodyTextSize;
+  color: $mainTextColor;
+}
+
+.part-data-header {
+  font-weight: lighter;
+}
+
+.part-data-list {
+  font-weight: lighter;
+
+  & > li {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 15px;
+    align-items: center;
+
+    & > div:first-child {
+      width: 120px;
+      text-align: right;
+    }
+    & > div:not(:first-child) {
+      font-family: monospace;
+    }
+  }
+}
+
+.price-color{
+  color: #cb8f0d !important;
+}
+
 .product-info {
   min-width: $minWidth;
   flex-grow: 3;
@@ -231,7 +276,7 @@ nav {
 }
 
 .product-info-table {
-  color: $regularFontColor;
+  color: $mainTextColor;
   min-width: 650px;
   max-width: 690px;
 
@@ -256,7 +301,7 @@ nav {
     min-width: 145px;
     height: 24px;
 
-    color: $regularFontColor;
+    color: $mainTextColor;
     font-weight: bold;
     border-bottom: 1px solid gray;
   }
@@ -275,14 +320,9 @@ nav {
 }
 
 .error-block {
-  padding-top: 40px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-
   & > * {
     margin: 0;
-    text-align: center;
+    font-weight: lighter;
   }
 
   h1 {
@@ -290,7 +330,7 @@ nav {
   }
 
   h3 {
-    font-weight: normal;
-    color: $regularFontColor;
+    color: $mainTextColor;
   }
 }
+

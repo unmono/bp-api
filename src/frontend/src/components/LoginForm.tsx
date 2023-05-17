@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import PartnumPlaceholder from "./PartnumPlaceholder";
 import { login } from "../api/axiosConfig";
-
-type LoginFormProps = {
-  onLogin: (login: string, password: string) => void;
-};
 
 const LoginForm: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -30,10 +24,9 @@ const LoginForm: React.FC = () => {
 
   return (
     <>
-      <PartnumPlaceholder />
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleLogin} className={'loginForm'}>
         <div>
-          <label htmlFor="login-input">Login:</label>
+          <label htmlFor="login-input">{'username>'}</label>
           <input
             type="text"
             id="login-input"
@@ -42,7 +35,7 @@ const LoginForm: React.FC = () => {
           />
         </div>
         <div>
-          <label htmlFor="password-input">Password:</label>
+          <label htmlFor="password-input">{'password>'}</label>
           <input
             type="password"
             id="password-input"
@@ -50,7 +43,7 @@ const LoginForm: React.FC = () => {
             onChange={(event) => setPassword(event.target.value)}
           />
         </div>
-        <button type="submit">Submit</button>
+        <button type="submit">#Login</button>
       </form>
     </>
   );
