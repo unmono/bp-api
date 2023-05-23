@@ -43,5 +43,5 @@ def get_partnum(db: Session, part_no: str):
 
 def search_products(db: Session, query):
     stmt = select(PartNumber.part_no, Product.title_en).\
-        join(Product).where(PartNumber.part_no.like(query))
+        join(Product, isouter=True).where(PartNumber.part_no.like(query))
     return db.execute(stmt).all()
