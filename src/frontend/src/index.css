@@ -64,6 +64,37 @@ nav > div {
   background: #269d26;
 }
 
+.exit-link {
+  color: brown;
+  background: #212222;
+  outline: 0;
+  border: 0;
+  font-size: 18px;
+  text-decoration: none;
+  font-weight: lighter;
+  cursor: pointer;
+}
+.exit-link:active {
+  color: #212222;
+  background: brown;
+}
+
+.logout-link {
+  color: brown;
+  background: #212222;
+  outline: 0;
+  border: 0;
+  font-size: 24px;
+  text-decoration: none;
+  font-weight: lighter;
+  cursor: pointer;
+  padding: 0;
+}
+.logout-link:active {
+  color: #212222;
+  background: brown;
+}
+
 .search-input {
   outline: none;
   border: 0;
@@ -126,6 +157,12 @@ nav > div {
 .loginForm button:active {
   color: #212222;
   background: #269d26;
+}
+
+.greetings {
+  font-size: 18px;
+  font-weight: lighter;
+  color: #7e7e7e;
 }
 
 .sections {
@@ -206,52 +243,6 @@ nav > div {
 
 .price-color {
   color: #cb8f0d !important;
-}
-
-.product-info {
-  min-width: 470px;
-  flex-grow: 3;
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-between;
-  gap: 20px;
-}
-.product-info-table {
-  color: #bbbbbb;
-  min-width: 650px;
-  max-width: 690px;
-}
-.product-info-table th {
-  text-align: left;
-  border-bottom: 1px solid gray;
-}
-.product-info-table td:first-child {
-  width: 40%;
-  text-align: right;
-  color: gray;
-  font-weight: lighter;
-}
-.product-info-table td {
-  font-size: 20px;
-  padding: 0 10px;
-}
-
-.refers > div {
-  min-width: 145px;
-  height: 24px;
-  color: #bbbbbb;
-  font-weight: bold;
-  border-bottom: 1px solid gray;
-}
-.refers > ul {
-  padding: 0 0 0 10px;
-  margin: 0;
-  font-size: 20px;
-}
-
-.noRefers {
-  font-weight: lighter;
-  color: gray;
 }
 
 .error-block > * {

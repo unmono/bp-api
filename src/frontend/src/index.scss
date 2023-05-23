@@ -92,6 +92,22 @@ $navLinksFontSize: 24px;
     $navLinksFontSize
   );
 }
+.exit-link {
+  @include links_base(
+    brown,
+    $linksBackColor,
+    $bodyTextSize
+  )
+}
+.logout-link {
+  @include links_base(
+    brown,
+    $linksBackColor,
+    $navLinksFontSize
+  );
+
+  padding: 0;
+}
 
 
 // ==========================================
@@ -175,6 +191,11 @@ $inputsBGColor: #414444;
     width: available;
   }
 }
+.greetings {
+  font-size: $bodyTextSize;
+  font-weight: lighter;
+  color: $secondaryTextColor;
+}
 
 .sections {
   padding: 0;
@@ -200,7 +221,6 @@ $inputsBGColor: #414444;
   justify-content: space-between;
   gap: 30px;
 }
-
 .refers-block {
 
   & > div {
@@ -209,13 +229,11 @@ $inputsBGColor: #414444;
     font-weight: lighter;
   }
 }
-
 .part-number {
   font-size: 30px;
   font-weight: lighter;
   color: $mainTextColor;
 }
-
 .product-status {
   font-size: 14px;
   font-style: italic;
@@ -228,18 +246,15 @@ $inputsBGColor: #414444;
   @extend .product-status;
   color: brown;
 }
-
 .part-data {
   margin-top: 10px;
 
   font-size: $bodyTextSize;
   color: $mainTextColor;
 }
-
 .part-data-header {
   font-weight: lighter;
 }
-
 .part-data-list {
   font-weight: lighter;
 
@@ -258,65 +273,8 @@ $inputsBGColor: #414444;
     }
   }
 }
-
 .price-color{
   color: #cb8f0d !important;
-}
-
-.product-info {
-  min-width: $minWidth;
-  flex-grow: 3;
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-between;
-  gap: 20px;
-
-  & > * {
-  }
-}
-
-.product-info-table {
-  color: $mainTextColor;
-  min-width: 650px;
-  max-width: 690px;
-
-  th {
-    text-align: left;
-    border-bottom: 1px solid gray;
-  }
-  td:first-child {
-    width: 40%;
-    text-align: right;
-    color: gray;
-    font-weight: lighter;
-  }
-  td {
-    font-size: 20px;
-    padding: 0 10px;
-  }
-}
-
-.refers {
-  & > div {
-    min-width: 145px;
-    height: 24px;
-
-    color: $mainTextColor;
-    font-weight: bold;
-    border-bottom: 1px solid gray;
-  }
-
-  & > ul {
-    padding: 0 0 0 10px;
-    margin: 0;
-
-    font-size: 20px;
-  }
-}
-
-.noRefers {
-  font-weight: lighter;
-  color: gray;
 }
 
 .error-block {

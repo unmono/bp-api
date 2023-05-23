@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+
 import { login } from "../api/axiosConfig";
+import { LoggedContext } from "../App";
 
 const LoginForm: React.FC = () => {
+  const {logged, setLogged} = useContext(LoggedContext);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -20,6 +23,8 @@ const LoginForm: React.FC = () => {
       Object.entries(cookie_props)
         .map(([key, value]) => `${key}=${value}`)
         .join('; ');
+
+    setLogged(true);
   };
 
   return (

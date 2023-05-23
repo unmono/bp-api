@@ -1,17 +1,10 @@
 import { useRouteError } from 'react-router-dom';
-
-import PartnumPlaceholder from "./PartnumPlaceholder";
+import ErrorLayout from "./ErrorLayout";
 
 export default function ErrorComponent() {
   const { data }: any = useRouteError();
-  console.log(data)
 
   return (
-    <>
-      <div className={'error-block'}>
-        { data.code && <h1>{ data.code }</h1> }
-        <h3>{ data.message }</h3>
-      </div>
-    </>
+    <ErrorLayout code={data.code} message={data.message} />
   );
 }

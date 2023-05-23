@@ -23,6 +23,11 @@ export const bpGet = async (
         code: error.response.status,
         message: error.response.data.detail,
       });
+    } else {
+      throw json({
+        code: 503,
+        message: 'Server doesn\'t respond'
+      })
     }
   }
 
@@ -40,8 +45,8 @@ export const searchPost = async (
       data,
       { withCredentials: true }
     );
-  } catch(error) {
-    console.log(error);
+  } catch(error: any) {
+    throw error;
   }
 
   return resp?.data;
@@ -63,8 +68,8 @@ export const login = async (username: string, password: string) => {
         }
       }
     );
-  } catch(error) {
-    console.log(error);
+  } catch(error: any) {
+
   }
 
   return resp?.data.access_token

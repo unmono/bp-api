@@ -13,11 +13,11 @@ import './index.css';
 import {bpGet} from "./api/axiosConfig";
 import Sections from "./components/Sections";
 import {validatePartnum} from "./functions";
-import ProductInfo from "./components/ProductInfo";
 import ErrorComponent from "./components/ErrorComponent";
 import LoginForm from "./components/LoginForm";
 import SearchResults from './components/SearchResults';
 import Part from "./components/Part";
+import LoginPage from "./components/LoginPage";
 
 const routes = (
   <Route
@@ -57,7 +57,8 @@ const routes = (
     />
     <Route
       path={'login'}
-      element={<LoginForm />}
+      element={<LoginPage />}
+      errorElement={<ErrorComponent />}
     />
   </Route>
 );
