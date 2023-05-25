@@ -32,7 +32,7 @@ class CookieOAuth2(OAuth2PasswordBearer):
 
 
 oauth2_scheme = CookieOAuth2(
-    tokenUrl='/login',
+    tokenUrl=f'{settings.ROUTE_PREFIX}/login',
     scopes={
         'user_manager': "Add or delete users",
         'catalogue': "View catalogue"
