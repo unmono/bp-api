@@ -97,7 +97,7 @@ BEGIN TRANSACTION;
             instr(subsub, '.') AS first_dotindex,
             subsub
         -- In one release there were strings that contain unbreakable spaces.
-        -- So we needed to replace them to normal ones.
+        -- Replace them to normal ones.
         FROM (SELECT DISTINCT replace(subsub, x'c2a0', x'20') as subsub FROM pricelist)
     ), subsub_splits AS(
         SELECT
@@ -150,14 +150,6 @@ BEGIN TRANSACTION;
         FROM refs
         INNER JOIN partnum p ON refs.predecessor = p.part_no
         INNER JOIN partnum s ON refs.successor = s.part_no;
-
---    INSERT INTO refers
---        SELECT
---            p.rowid AS predecessor,
---            s.rowid AS successor
---        FROM refs
---        INNER JOIN partnum p ON refs.predecessor = p.part_no
---        INNER JOIN partnum s ON refs.successor = s.part_no;
 
 
     -- Relating pricelist entries to sub-subsections

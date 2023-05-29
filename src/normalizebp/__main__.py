@@ -3,8 +3,6 @@ import shutil
 import sqlite3
 from contextlib import closing
 
-from unmonostuff.perfomance_tools import execution_timer
-
 
 from parse_settings import ParseSettings
 settings = ParseSettings()
@@ -31,7 +29,6 @@ def get_script(normalization_file: str = 'bp_normalization.sql') -> str:
     return normalization
 
 
-@execution_timer
 def run_normalization(db_filename: str, normalization_filename: str) -> None:
     with closing(sqlite3.connect(db_filename)) as db:
         db.executescript(normalization_filename)
