@@ -21,7 +21,7 @@ class DevSettings(BaseSettings):
     ]
 
     # Databases:
-    DATABASE_PATH: str = '../bp.sqlite'
+    DATABASE_PATH: str = 'bp.sqlite'
     USERS_DB_PATH: str = 'users.sqlite'
 
     # Authentication
