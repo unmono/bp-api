@@ -25,7 +25,7 @@ class DevSettings(BaseSettings):
     USERS_DB_PATH: str = 'users.sqlite'
 
     # Authentication
-    AUTH_KEY: str
+    AUTH_KEY: str = 'CHANGE-ME-EVENTUALY-8465cc4e15b7516d89b98f40836de34203848'
     AUTH_ALG: str = 'HS256'
     TOKEN_EXPIRE_HOURS: int = 6
 
