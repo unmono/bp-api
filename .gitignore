@@ -5,3 +5,4 @@ bp-venv/
 *.sqlite
 src/testprice.xlsx
 test_models.py
+.env
